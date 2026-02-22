@@ -8,6 +8,8 @@
  * Text Domain: presswell-gf-tracking-field
  */
 
+// ?utm_source=google&utm_medium=cpc&utm_campaign=winter_launch&utm_content=cta_banner&utm_term=snow_boots&gclid=Cj0KCQiAzbi-ABCD1234&fbclid=fb.9876543210XYZ&msclkid=MSCLKID123456&ttclid=TTCLID-987654&landing_page=https%3A%2F%2Fexample.com%2Fwinter-sale&landing_query=%3Fref%3Dpartner&referrer=https%3A%2F%2Fpartner-site.com
+
 if ( ! defined( 'ABSPATH' ) ) {
   exit;
 }
