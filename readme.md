@@ -1,4 +1,4 @@
-# Gravity Forms Session Tracker Field
+# Presswell Tracking Field for Gravity Forms
 
 Lightweight add-on that adds a hidden field to Gravity Forms for capturing UTM, click IDs, landing page, and referrer values. The field stores parameters for the duration of a visitor session using `localStorage`, ensuring every form submission carries attribution metadata.
 
@@ -24,7 +24,7 @@ Lightweight add-on that adds a hidden field to Gravity Forms for capturing UTM, 
 
 ## Usage
 
-1. Upload the plugin directory to `wp-content/plugins/` and activate **Gravity Forms Session Tracker Field**.
+1. Upload the plugin directory to `wp-content/plugins/` and activate **Presswell Tracking Field for Gravity Forms**.
 2. Edit a Gravity Form, open the **Advanced Fields** panel, and add the **Tracking** field.
 3. Publish the form. Hidden inputs are injected automatically and populated on page load.
 4. Append UTM or click tracking params to your landing URLs; submissions will include those values in the entry data.
