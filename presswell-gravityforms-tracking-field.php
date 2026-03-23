@@ -47,6 +47,7 @@ if ( ! class_exists( 'Presswell_GF_Tracking_Field' ) ) {
     const STYLE_HANDLE   = 'presswell-gf-gumshoe-css';
     const STORAGE_KEY    = 'gfGumshoe';
     const TTL_SECONDS    = 3600; // 86400;
+    const MAX_VALUE_LENGTH = 1024;
     const PLUGIN_FILE    = __FILE__;
 
     /**
@@ -139,6 +140,7 @@ if ( ! class_exists( 'Presswell_GF_Tracking_Field' ) ) {
       add_filter( 'gform_pre_render', [ $this, 'enforce_single_tracking_field' ], 5 );
       add_filter( 'gform_pre_validation', [ $this, 'enforce_single_tracking_field' ], 5 );
       add_filter( 'gform_pre_submission_filter', [ $this, 'enforce_single_tracking_field' ], 5 );
+      add_filter( 'gform_pre_submission_filter', [ $this, 'sanitize_tracking_submission_values' ], 10 );
       add_filter( 'gform_admin_pre_render', [ $this, 'enforce_single_tracking_field' ], 5 );
     }
 
@@ -293,6 +295,52 @@ if ( ! class_exists( 'Presswell_GF_Tracking_Field' ) ) {
     }
 
     /**
+     * Sanitize and clamp posted tracking input values before Gravity Forms saves the entry.
+     *
+     * @param array $form Current Gravity Forms form array.
+     *
+     * @return array
+     */
+    public function sanitize_tracking_submission_values( $form ) {
+      if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) || empty( $_POST ) || ! is_array( $_POST ) ) {
+        return $form;
+      }
+
+      foreach ( $form['fields'] as $field ) {
+        $field_type = $this->extract_field_type( $field );
+        if ( self::FIELD_TYPE !== $field_type ) {
+          continue;
+        }
+
+        $field_id = $this->extract_field_id( $field );
+        if ( ! $field_id ) {
+          continue;
+        }
+
+        $index = 1;
+        foreach ( self::get_tracking_keys() as $key ) {
+          $posted_key = sprintf( 'input_%d_%d', $field_id, $index );
+          if ( ! isset( $_POST[ $posted_key ] ) ) {
+            $index++;
+            continue;
+          }
+
+          $raw = wp_unslash( $_POST[ $posted_key ] );
+          if ( is_array( $raw ) ) {
+            unset( $_POST[ $posted_key ] );
+            $index++;
+            continue;
+          }
+
+          $_POST[ $posted_key ] = self::sanitize_tracking_value( $key, $raw );
+          $index++;
+        }
+      }
+
+      return $form;
+    }
+
+    /**
      * Block editors from inserting multiple gumshoe fields.
      */
     public function output_editor_guard_js() {
@@ -345,6 +393,76 @@ if ( ! class_exists( 'Presswell_GF_Tracking_Field' ) ) {
       }
 
       return '';
+    }
+
+    /**
+     * Extract the numeric field id from a field object or array.
+     *
+     * @param mixed $field Gravity Forms field object or array.
+     *
+     * @return int
+     */
+    private function extract_field_id( $field ) {
+      if ( is_object( $field ) && isset( $field->id ) ) {
+        return absint( $field->id );
+      }
+
+      if ( is_array( $field ) && isset( $field['id'] ) ) {
+        return absint( $field['id'] );
+      }
+
+      return 0;
+    }
+
+    /**
+     * Sanitize a tracking value and enforce max length.
+     *
+     * @param string $key Tracking key.
+     * @param mixed  $value Tracking value.
+     *
+     * @return string
+     */
+    public static function sanitize_tracking_value( $key, $value ) {
+      if ( ! is_scalar( $value ) ) {
+        return '';
+      }
+
+      $clean = sanitize_textarea_field( (string) $value );
+      if ( '' === $clean ) {
+        return '';
+      }
+
+      $clean = self::truncate_value( $clean );
+      if ( '' === $clean ) {
+        return '';
+      }
+
+      if ( in_array( $key, [ 'landing_page', 'referrer' ], true ) ) {
+        $clean = esc_url_raw( $clean );
+        return self::truncate_value( $clean );
+      }
+
+      return $clean;
+    }
+
+    /**
+     * Clamp string values to the plugin max length.
+     *
+     * @param string $value Raw value.
+     *
+     * @return string
+     */
+    private static function truncate_value( $value ) {
+      $value = (string) $value;
+      if ( '' === $value ) {
+        return '';
+      }
+
+      if ( function_exists( 'mb_substr' ) ) {
+        return mb_substr( $value, 0, self::MAX_VALUE_LENGTH );
+      }
+
+      return substr( $value, 0, self::MAX_VALUE_LENGTH );
     }
   }
 }

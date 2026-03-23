@@ -142,6 +142,7 @@ if ( class_exists( 'GF_Field' ) && ! class_exists( 'GF_Field_Presswell_Tracking'
         $custom_id  = sprintf( 'input_%d_%s', $form_id, str_replace( '.', '_', $input_id ) );
         $field_name = 'input_' . str_replace( '.', '_', $input_id );
         $current    = '';
+        $key_name   = isset( $input['name'] ) ? (string) $input['name'] : '';
 
         if ( is_array( $value ) ) {
           $current = rgar( $value, $input_id );
@@ -155,6 +156,8 @@ if ( class_exists( 'GF_Field' ) && ! class_exists( 'GF_Field_Presswell_Tracking'
             $current = $entry_value;
           }
         }
+
+        $current = Presswell_GF_Tracking_Field::sanitize_tracking_value( $key_name, $current );
 
         $input_tag[] = sprintf(
           '<input type="hidden" id="%1$s" name="%2$s" value="%3$s" data-presswell-gumshoe="%4$s" />',
@@ -284,7 +287,7 @@ if ( class_exists( 'GF_Field' ) && ! class_exists( 'GF_Field_Presswell_Tracking'
         if ( null === $value && isset( $source[ $key ] ) ) {
           $value = $source[ $key ];
         }
-        $pairs[ $key ] = is_scalar( $value ) ? (string) $value : '';
+        $pairs[ $key ] = Presswell_GF_Tracking_Field::sanitize_tracking_value( $key, $value );
         $index++;
       }
 
