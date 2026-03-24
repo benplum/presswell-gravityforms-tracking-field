@@ -82,6 +82,42 @@ add_filter( 'presswell_signal_relay_tracking_ttl', function( $ttl, $context ) {
 * **$context** (string) (required) - Adapter context (`core`, `gravityforms`, `forminator`, or `contactform7`).
 * Return a non-empty string.
 
+**Contact Form 7 Mail Output**
+
+Use the special mail tag below inside Contact Form 7 mail templates to print transceiver values:
+
+`
+[_pwsr_transceiver]
+`
+
+The tag is also added to Contact Form 7's Mail panel "you can use these mail-tags" suggestion list.
+
+An alias is also supported:
+
+`
+[pwsr_transceiver]
+`
+
+Each outputs non-empty values as key/value lines.
+
+**Optional Auto-Append for Contact Form 7 Mail**
+
+By default, transceiver values are not auto-appended to mail bodies.
+
+Enable auto-append with:
+
+`
+add_filter( 'presswell_signal_relay_cf7_auto_append_tracking', '__return_true' );
+`
+
+Optional custom section label:
+
+`
+add_filter( 'presswell_signal_relay_cf7_tracking_label', function() {
+    return 'Attribution';
+} );
+`
+
 **Default Tracking Keys**
 
 * `utm_source`
