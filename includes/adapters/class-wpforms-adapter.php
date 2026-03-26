@@ -33,13 +33,6 @@ class PWTSR_WPForms_Adapter implements PWTSR_Form_Adapter_Interface {
   private $localized_objects = [];
 
   /**
-   * Whether inline visibility styles were enqueued.
-   *
-   * @var bool
-   */
-  private $styles_enqueued = false;
-
-  /**
    * @param PWTSR_Tracking_Service $service Shared tracking service.
    */
   public function __construct( PWTSR_Tracking_Service $service ) {

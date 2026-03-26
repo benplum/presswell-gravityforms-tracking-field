@@ -99,15 +99,15 @@ trait PWTSR_Adapter_Bootstrap_Trait {
           'includes/adapters/class-contact-form-7-adapter.php',
         ],
       ],
-      // [
-      //   'detector' => [ $this, 'is_wpforms_available' ],
-      //   'class'    => 'PWTSR_WPForms_Adapter',
-      //   'files'    => [
-      //     'includes/traits/trait-adapter-assets.php',
-      //     'includes/traits/trait-wpforms-adapter.php',
-      //     'includes/adapters/class-wpforms-adapter.php',
-      //   ],
-      // ],
+      [
+        'detector' => [ $this, 'is_wpforms_available' ],
+        'class'    => 'PWTSR_WPForms_Adapter',
+        'files'    => [
+          'includes/traits/trait-adapter-assets.php',
+          'includes/traits/trait-wpforms-adapter.php',
+          'includes/adapters/class-wpforms-adapter.php',
+        ],
+      ],
       // [
       //   'detector' => [ $this, 'is_ninja_forms_available' ],
       //   'class'    => 'PWTSR_Ninja_Forms_Adapter',

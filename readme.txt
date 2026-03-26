@@ -148,7 +148,7 @@ Yes. Use the `pwtsr_tracking_keys` filter to add or remove keys.
 
 = Why isn't my form plugin supported? =
 
-We plan to support additional form ecosystems, but each integration requires reliable extension points for hidden field rendering, submission lifecycle hooks, entry persistence, and token/merge-tag resolution. Some form plugins do not expose these capabilities consistently enough to deliver a production-ready adapter.
+We plan to support additional form ecosystems, but each integration requires reliable extension points for hidden field rendering, submission lifecycle hooks, entry persistence, and token/merge-tag resolution. Some form plugins do not expose these capabilities consistently enough to deliver a production-ready adapter. We are also prioritizing support for plugins with transparent licensing, complete core functionality, and a respectful user experience.
 
 == Screenshots ==
 

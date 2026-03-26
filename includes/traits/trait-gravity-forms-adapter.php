@@ -333,7 +333,7 @@ trait PWTSR_Gravity_Forms_Trait {
 
     $pairs = $this->get_gravity_tracking_pairs_from_entry( $form, $entry );
     if ( empty( $pairs ) ) {
-      $text = str_replace( [ '{tracking:all}', '{tracking_values}' ], '', $text );
+      $text = str_replace( [ '{tracking:all}' ], '', $text );
 
       return preg_replace( '/\{tracking:([a-z0-9_\-]+)\}/i', '', $text );
     }
@@ -347,7 +347,6 @@ trait PWTSR_Gravity_Forms_Trait {
     ) );
 
     $text = str_replace( '{tracking:all}', $this->format_merge_tag_value( $all_value, $url_encode, $esc_html, $nl2br, $format ), $text );
-    $text = str_replace( '{tracking_values}', $this->format_merge_tag_value( $all_value, $url_encode, $esc_html, $nl2br, $format ), $text );
 
     return preg_replace_callback(
       '/\{tracking:([a-z0-9_\-]+)\}/i',
