@@ -64,7 +64,7 @@ trait PWTSR_Settings_Trait {
     $input = is_array( $input ) ? $input : [];
 
     return [
-      'debug_mode' => ! empty( $input['debug_mode'] ) ? 'on' : '',
+      'debug_mode' => ! empty( $input['debug_mode'] ) ? 'on' : 'off',
       'custom_params' => $this->sanitize_custom_params_list( isset( $input['custom_params'] ) ? $input['custom_params'] : '' ),
     ];
   }
@@ -76,7 +76,7 @@ trait PWTSR_Settings_Trait {
    */
   public function get_default_settings() {
     return [
-      'debug_mode' => '',
+      'debug_mode' => 'off',
       'custom_params' => [],
     ];
   }
@@ -87,7 +87,10 @@ trait PWTSR_Settings_Trait {
    * @return array
    */
   public function get_settings() {
-    return wp_parse_args( get_option( PWTSR::SETTINGS_KEY, [] ), $this->get_default_settings() );
+    $settings = wp_parse_args( get_option( PWTSR::SETTINGS_KEY, [] ), $this->get_default_settings() );
+    $settings['debug_mode'] = ! empty( $settings['debug_mode'] ) ? 'on' : 'off';
+
+    return $settings;
   }
 
   /**
@@ -98,7 +101,7 @@ trait PWTSR_Settings_Trait {
   public function is_debug_mode_enabled() {
     $settings = $this->get_settings();
 
-    return ! empty( $settings['debug_mode'] );
+    return isset( $settings['debug_mode'] ) && 'on' === $settings['debug_mode'];
   }
 
   /**
@@ -117,7 +120,7 @@ trait PWTSR_Settings_Trait {
     $settings = $this->get_settings();
     ?>
     <label>
-      <input type="checkbox" name="<?php echo esc_attr( PWTSR::SETTINGS_KEY ); ?>[debug_mode]" value="on" <?php checked( ! empty( $settings['debug_mode'] ) ); ?> />
+      <input type="checkbox" name="<?php echo esc_attr( PWTSR::SETTINGS_KEY ); ?>[debug_mode]" value="on" <?php checked( isset( $settings['debug_mode'] ) ? $settings['debug_mode'] : 'off', 'on' ); ?> />
       <?php echo esc_html__( 'Show tracking field containers on the frontend for editors and admins.', PWTSR::TEXT_DOMAIN ); ?>
     </label>
     <?php

@@ -27,7 +27,11 @@
  * along with Presswell Tracking Signal Relay. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// ?utm_source=google&utm_medium=cpc&utm_campaign=winter_launch&utm_content=cta_banner&utm_term=snow_boots&gclid=Cj0KCQiAzbi-ABCD1234&fbclid=fb.9876543210XYZ&msclkid=MSCLKID123456&ttclid=TTCLID-987654&landing_page=https%3A%2F%2Fexample.com%2Fwinter-sale&landing_query=%3Fref%3Dpartner&referrer=https%3A%2F%2Fpartner-site.com
+/*
+ * Manual QA sample query string for transceiver testing.
+ * Paste onto any frontend URL to verify capture and form field relay.
+ */
+// ?utm_source=google&utm_medium=cpc&utm_campaign=winter_launch&utm_content=cta_banner&utm_term=snow_boots&gclid=Cj0KCQiAzbi-ABCD1234&fbclid=fb.9876543210XYZ&msclkid=MSCLKID123456&ttclid=TTCLID-987654&landing_page=https%3A%2F%2Fexample.com%2Fwinter-sale&landing_query=%3Fref%3Dpartner&referrer=https%3A%2F%2Fpartner-site.com&campaign_source=foobar
 
 if ( ! defined( 'ABSPATH' ) ) {
   exit;
@@ -45,11 +49,9 @@ require_once __DIR__ . '/includes/traits/trait-settings.php';
 require_once __DIR__ . '/includes/traits/trait-pages.php';
 
 if ( ! class_exists( 'Presswell_Tracking_Signal_Relay' ) ) {
-
   /**
    * Composition root for all plugin features.
    */
-
   final class Presswell_Tracking_Signal_Relay {
     use PWTSR_Adapter_Bootstrap_Trait;
     use PWTSR_Service_Access_Trait;
@@ -62,7 +64,7 @@ if ( ! class_exists( 'Presswell_Tracking_Signal_Relay' ) ) {
     /**
      * Cached singleton instance.
      *
-    * @var Presswell_Tracking_Signal_Relay|null
+      * @var Presswell_Tracking_Signal_Relay|null
      */
     private static $instance = null;
 
@@ -86,7 +88,7 @@ if ( ! class_exists( 'Presswell_Tracking_Signal_Relay' ) ) {
     /**
      * Return shared plugin instance.
      *
-    * @return Presswell_Tracking_Signal_Relay
+      * @return Presswell_Tracking_Signal_Relay
      */
     public static function instance() {
       if ( null === self::$instance ) {
