@@ -117,6 +117,10 @@
     return merged;
   }
 
+  function hasFreshTrackedValues(fresh) {
+    return !!(fresh && Object.keys(fresh).length);
+  }
+
   function ensureDerivedValues(values) {
     var updated = Object.assign({}, values);
     if (!updated.landing_page) {
@@ -189,55 +193,68 @@
     });
   }
 
-  // function populateNinjaTrackingFields(values) {
-  //   if (!values || !window.nfForms || !Array.isArray(window.nfForms)) {
+  function buildTrackingPayload(values) {
+    var payload = {};
+    if (!values || typeof values !== 'object') {
+      return payload;
+    }
+
+    Object.keys(values).forEach(function (key) {
+      if (!key || values[key] === undefined || values[key] === null || values[key] === '') {
+        return;
+      }
+      payload[key] = values[key];
+    });
+
+    return payload;
+  }
+
+  // function syncNinjaTrackingFields(values) {
+  //   var payload = buildTrackingPayload(values);
+  //   var json = JSON.stringify(payload);
+  //   var forms = document.querySelectorAll('form[id^="nf-form-"]');
+
+  //   if (!forms.length) {
   //     return;
   //   }
 
-  //   window.nfForms.forEach(function (form) {
-  //     if (!form || !Array.isArray(form.fields)) {
+  //   forms.forEach(function (form) {
+  //     var trackingInputs = form.querySelectorAll('.presswell_tracking-wrap input[type="hidden"], .presswell_tracking-container input[type="hidden"]');
+
+  //     trackingInputs.forEach(function (input) {
+  //       input.value = json;
+  //     });
+  //   });
+
+  //   if (!Array.isArray(window.nfForms)) {
+  //     return;
+  //   }
+
+  //   window.nfForms.forEach(function (nfForm) {
+  //     if (!nfForm || !Array.isArray(nfForm.fields)) {
   //       return;
   //     }
 
-  //     form.fields.forEach(function (field) {
+  //     nfForm.fields.forEach(function (field) {
   //       var settings = field && field.settings ? field.settings : field;
   //       if (!settings || settings.type !== 'presswell_tracking') {
   //         return;
   //       }
 
-  //       var trackingKey = (settings.pwtsr_tracking_key || settings.key || '').toString();
-  //       if (!trackingKey) {
+  //       settings.value = json;
+  //       if (field && typeof field === 'object') {
+  //         field.value = json;
+  //       }
+
+  //       if (!settings.id) {
   //         return;
   //       }
 
-  //       var inputId = 'nf-field-' + settings.id;
-  //       var input = document.getElementById(inputId);
-  //       if (!input) {
-  //         return;
+  //       var domInput = document.getElementById('nf-field-' + settings.id);
+  //       if (domInput) {
+  //         domInput.value = json;
   //       }
-
-  //       input.value = values[trackingKey] || '';
   //     });
-  //   });
-  // }
-
-  // function populateWPFormsTrackingFields(values) {
-  //   if (!values) {
-  //     return;
-  //   }
-
-  //   var wpformsInputs = document.querySelectorAll('.wpforms-form input[data-presswell-transceiver]');
-  //   if (!wpformsInputs.length) {
-  //     return;
-  //   }
-
-  //   wpformsInputs.forEach(function (input) {
-  //     var key = input.getAttribute('data-presswell-transceiver');
-  //     if (!key) {
-  //       return;
-  //     }
-
-  //     input.value = values[key] || '';
   //   });
   // }
 
@@ -245,7 +262,10 @@
     var stored = readStorage() || {};
     var fresh = getQueryValues();
 
-    var merged = mergeValues(stored, fresh);
+    // If this page has tracked query params, treat it as a new attribution context.
+    // Do not merge with prior persisted values from an older visit.
+    var base = hasFreshTrackedValues(fresh) ? {} : stored;
+    var merged = mergeValues(base, fresh);
     merged = ensureDerivedValues(merged);
 
     if (Object.keys(merged).length) {
@@ -254,12 +274,29 @@
 
     injectForminatorFallbackInputs();
     populateInputs(merged);
-    // populateNinjaTrackingFields(merged);
-    // populateWPFormsTrackingFields(merged);
+    // syncNinjaTrackingFields(merged);
   }
 
   function init() {
     syncSignals();
+
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+      if (form && form.matches && form.matches('form[id^="nf-form-"]')) {
+        syncSignals();
+      }
+    }, true);
+
+    document.addEventListener('click', function (event) {
+      var target = event.target;
+      if (!target || !target.closest) {
+        return;
+      }
+
+      if (target.closest('form[id^="nf-form-"]')) {
+        syncSignals();
+      }
+    }, true);
 
     if (typeof MutationObserver !== 'function') {
       return;

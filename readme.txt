@@ -1,6 +1,6 @@
 === Presswell Tracking Signal Relay ===
 Contributors: presswell, benplum
-Tags: gravity forms, contact form 7, forminator, formidable forms, attribution, utm, tracking, hidden field, marketing, click id
+Tags: attribution, utm, tracking, marketing
 Requires at least: 6.1
 Tested up to: 6.5
 Stable tag: trunk
@@ -106,10 +106,10 @@ Install via the WordPress plugin installer or manually upload the folder to `wp-
 2. If using Gravity Forms, edit a form and add the **Tracking** field from *Advanced Fields*.
 3. If using WPForms, edit a form and add the **Tracking** field.
 4. If using Fluent Forms, edit a form and add the **Tracking** field.
-5. If using Forminator, publish a custom form (tracking inputs are injected automatically).
-6. If using Contact Form 7, publish any form (tracking inputs are injected automatically).
-7. If using Formidable, edit a form and add the **Tracking** field.
-8. Send traffic with UTM/click parameters.
+6. If using Forminator, publish a custom form (tracking inputs are injected automatically).
+7. If using Contact Form 7, publish any form (tracking inputs are injected automatically).
+8. If using Formidable, edit a form and add the **Tracking** field.
+9. Send traffic with UTM/click parameters.
 
 == Frequently Asked Questions ==
 

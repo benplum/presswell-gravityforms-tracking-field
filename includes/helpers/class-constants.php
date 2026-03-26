@@ -29,13 +29,13 @@ final class PWTSR {
 
   const JS_OBJECT = 'presswellSignalRelayConfig';
 
-  const ADAPTER_GRAVITY_FORMS = 'gravityforms';
-  const ADAPTER_FORMINATOR = 'forminator';
   const ADAPTER_CONTACT_FORM_7 = 'contactform7';
-  const ADAPTER_WPFORMS = 'wpforms';
-  // const ADAPTER_NINJA_FORMS = 'ninjaforms';
   const ADAPTER_FLUENT_FORMS = 'fluentforms';
   const ADAPTER_FORMIDABLE = 'formidable';
+  const ADAPTER_FORMINATOR = 'forminator';
+  const ADAPTER_GRAVITY_FORMS = 'gravityforms';
+  // const ADAPTER_NINJA_FORMS = 'ninjaforms';
+  const ADAPTER_WPFORMS = 'wpforms';
   
   const DEFAULT_TRACKING_KEYS = [
     'utm_source',

@@ -35,10 +35,18 @@ trait PWTSR_Settings_Trait {
       '__return_false',
       PWTSR::SETTINGS_PAGE_SLUG
     );
+    
+    add_settings_field(
+      'custom_params',
+      __( 'Custom Query Params', PWTSR::TEXT_DOMAIN ),
+      [ $this, 'render_custom_params_field' ],
+      PWTSR::SETTINGS_PAGE_SLUG,
+      'pwtsr_main_section'
+    );
 
     add_settings_field(
       'debug_mode',
-      __( 'Debug Mode', PWTSR::TEXT_DOMAIN ),
+      __( 'Debug Display', PWTSR::TEXT_DOMAIN ),
       [ $this, 'render_debug_mode_field' ],
       PWTSR::SETTINGS_PAGE_SLUG,
       'pwtsr_main_section'
@@ -57,6 +65,7 @@ trait PWTSR_Settings_Trait {
 
     return [
       'debug_mode' => ! empty( $input['debug_mode'] ) ? 'on' : '',
+      'custom_params' => $this->sanitize_custom_params_list( isset( $input['custom_params'] ) ? $input['custom_params'] : '' ),
     ];
   }
 
@@ -68,6 +77,7 @@ trait PWTSR_Settings_Trait {
   public function get_default_settings() {
     return [
       'debug_mode' => '',
+      'custom_params' => [],
     ];
   }
 
@@ -111,6 +121,60 @@ trait PWTSR_Settings_Trait {
       <?php echo esc_html__( 'Show tracking field containers on the frontend for editors and admins.', PWTSR::TEXT_DOMAIN ); ?>
     </label>
     <?php
+  }
+
+  /**
+   * Render custom tracking parameter textarea.
+   */
+  public function render_custom_params_field() {
+    $settings = $this->get_settings();
+    $rows = isset( $settings['custom_params'] ) && is_array( $settings['custom_params'] ) ? $settings['custom_params'] : [];
+    $value = implode( "\n", $rows );
+    ?>
+    <textarea
+      name="<?php echo esc_attr( PWTSR::SETTINGS_KEY ); ?>[custom_params]"
+      rows="6"
+      class="large-text code"
+      placeholder="utm_id&#10;affiliate_id&#10;campaign_source"
+    ><?php echo esc_textarea( $value ); ?></textarea>
+    <p class="description">
+      <?php echo esc_html__( 'Add custom query parameter keys to track. Use commas or new lines (for example: utm_id, affiliate_id).', PWTSR::TEXT_DOMAIN ); ?>
+    </p>
+    <?php
+  }
+
+  /**
+   * Normalize comma/newline separated custom parameter input.
+   *
+   * @param mixed $raw Raw setting value.
+   *
+   * @return string[]
+   */
+  private function sanitize_custom_params_list( $raw ) {
+    if ( is_array( $raw ) ) {
+      $raw = implode( "\n", $raw );
+    }
+
+    if ( ! is_scalar( $raw ) ) {
+      return [];
+    }
+
+    $parts = preg_split( '/[\r\n,]+/', (string) $raw );
+    if ( ! is_array( $parts ) ) {
+      return [];
+    }
+
+    $keys = [];
+    foreach ( $parts as $part ) {
+      $clean = sanitize_key( trim( (string) $part ) );
+      if ( '' === $clean ) {
+        continue;
+      }
+
+      $keys[] = $clean;
+    }
+
+    return array_values( array_unique( $keys ) );
   }
 
   /**

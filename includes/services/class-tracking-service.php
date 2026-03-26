@@ -17,7 +17,8 @@ class PWTSR_Tracking_Service {
    * @return string[]
    */
   public function get_tracking_keys( $context = 'core' ) {
-    $keys = apply_filters( 'pwtsr_tracking_keys', PWTSR::DEFAULT_TRACKING_KEYS, $context );
+    $keys = array_merge( PWTSR::DEFAULT_TRACKING_KEYS, $this->get_custom_settings_keys() );
+    $keys = apply_filters( 'pwtsr_tracking_keys', $keys, $context );
 
     return $this->sanitize_keys( $keys );
   }
@@ -135,5 +136,23 @@ class PWTSR_Tracking_Service {
     $sanitized = array_values( array_unique( $sanitized ) );
 
     return ! empty( $sanitized ) ? $sanitized : PWTSR::DEFAULT_TRACKING_KEYS;
+  }
+
+  /**
+   * Read custom tracking keys from plugin settings.
+   *
+   * @return string[]
+   */
+  private function get_custom_settings_keys() {
+    $settings = get_option( PWTSR::SETTINGS_KEY, [] );
+    if ( ! is_array( $settings ) || empty( $settings['custom_params'] ) ) {
+      return [];
+    }
+
+    if ( ! is_array( $settings['custom_params'] ) ) {
+      return [];
+    }
+
+    return $settings['custom_params'];
   }
 }

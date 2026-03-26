@@ -115,25 +115,6 @@ trait PWTSR_Adapter_Bootstrap_Trait {
   private function get_adapter_blueprints() {
     return [
       [
-        'detector' => [ $this, 'is_gravity_forms_available' ],
-        'class'    => 'PWTSR_Gravity_Forms_Adapter',
-        'files'    => [
-          'includes/traits/trait-adapter-assets.php',
-          'includes/traits/trait-gravity-forms-adapter.php',
-          'includes/adapters/class-gravity-forms-field.php',
-          'includes/adapters/class-gravity-forms-adapter.php',
-        ],
-      ],
-      [
-        'detector' => [ $this, 'is_forminator_available' ],
-        'class'    => 'PWTSR_Forminator_Adapter',
-        'files'    => [
-          'includes/traits/trait-adapter-assets.php',
-          'includes/traits/trait-forminator-adapter.php',
-          'includes/adapters/class-forminator-adapter.php',
-        ],
-      ],
-      [
         'detector' => [ $this, 'is_contact_form_7_available' ],
         'class'    => 'PWTSR_Contact_Form_7_Adapter',
         'files'    => [
@@ -141,26 +122,7 @@ trait PWTSR_Adapter_Bootstrap_Trait {
           'includes/traits/trait-contact-form-7-adapter.php',
           'includes/adapters/class-contact-form-7-adapter.php',
         ],
-      ],
-      [
-        'detector' => [ $this, 'is_wpforms_available' ],
-        'class'    => 'PWTSR_WPForms_Adapter',
-        'files'    => [
-          'includes/traits/trait-adapter-assets.php',
-          'includes/traits/trait-wpforms-adapter.php',
-          'includes/adapters/class-wpforms-adapter.php',
-        ],
-      ],
-      // [
-      //   'detector' => [ $this, 'is_ninja_forms_available' ],
-      //   'class'    => 'PWTSR_Ninja_Forms_Adapter',
-      //   'files'    => [
-      //     'includes/traits/trait-adapter-assets.php',
-      //     'includes/traits/trait-ninja-forms-adapter.php',
-      //     'includes/adapters/class-ninja-forms-adapter.php',
-      //   ],
-      // ],
-      [
+      ],[
         'detector' => [ $this, 'is_fluent_forms_available' ],
         'class'    => 'PWTSR_Fluent_Forms_Adapter',
         'files'    => [
@@ -180,27 +142,46 @@ trait PWTSR_Adapter_Bootstrap_Trait {
           'includes/adapters/class-formidable-adapter.php',
         ],
       ],
+      [
+        'detector' => [ $this, 'is_forminator_available' ],
+        'class'    => 'PWTSR_Forminator_Adapter',
+        'files'    => [
+          'includes/traits/trait-adapter-assets.php',
+          'includes/traits/trait-forminator-adapter.php',
+          'includes/adapters/class-forminator-adapter.php',
+        ],
+      ],
+      [
+        'detector' => [ $this, 'is_gravity_forms_available' ],
+        'class'    => 'PWTSR_Gravity_Forms_Adapter',
+        'files'    => [
+          'includes/traits/trait-adapter-assets.php',
+          'includes/traits/trait-gravity-forms-adapter.php',
+          'includes/adapters/class-gravity-forms-field.php',
+          'includes/adapters/class-gravity-forms-adapter.php',
+        ],
+      ],
+      // [
+      //   'detector' => [ $this, 'is_ninja_forms_available' ],
+      //   'class'    => 'PWTSR_Ninja_Forms_Adapter',
+      //   'files'    => [
+      //     'includes/traits/trait-adapter-assets.php',
+      //     'includes/traits/trait-ninja-forms-adapter.php',
+      //     'includes/adapters/class-ninja-forms-adapter.php',
+      //   ],
+      // ],
+      [
+        'detector' => [ $this, 'is_wpforms_available' ],
+        'class'    => 'PWTSR_WPForms_Adapter',
+        'files'    => [
+          'includes/traits/trait-adapter-assets.php',
+          'includes/traits/trait-wpforms-adapter.php',
+          'includes/adapters/class-wpforms-adapter.php',
+        ],
+      ],
     ];
   }
-
-  /**
-   * Determine whether Gravity Forms is loaded.
-   *
-   * @return bool
-   */
-  private function is_gravity_forms_available() {
-    return class_exists( 'GFForms' );
-  }
-
-  /**
-   * Determine whether Forminator is loaded.
-   *
-   * @return bool
-   */
-  private function is_forminator_available() {
-    return defined( 'FORMINATOR_VERSION' ) || function_exists( 'forminator_custom_forms' );
-  }
-
+  
   /**
    * Determine whether Contact Form 7 is loaded.
    *
@@ -209,25 +190,7 @@ trait PWTSR_Adapter_Bootstrap_Trait {
   private function is_contact_form_7_available() {
     return defined( 'WPCF7_VERSION' ) || function_exists( 'wpcf7' );
   }
-
-  /**
-   * Determine whether WPForms is loaded.
-   *
-   * @return bool
-   */
-  private function is_wpforms_available() {
-    return defined( 'WPFORMS_VERSION' ) || function_exists( 'wpforms' ) || class_exists( '\\WPForms\\WPForms' );
-  }
-
-  // /**
-  //  * Determine whether Ninja Forms is loaded.
-  //  *
-  //  * @return bool
-  //  */
-  // private function is_ninja_forms_available() {
-  //   return defined( 'NINJA_FORMS_VERSION' ) || class_exists( 'Ninja_Forms' ) || function_exists( 'Ninja_Forms' );
-  // }
-
+  
   /**
    * Determine whether Fluent Forms is loaded.
    *
@@ -245,4 +208,41 @@ trait PWTSR_Adapter_Bootstrap_Trait {
   private function is_formidable_available() {
     return defined( 'FORMIDABLE_VERSION' ) || class_exists( 'FrmAppHelper' );
   }
+  
+  /**
+   * Determine whether Forminator is loaded.
+   *
+   * @return bool
+   */
+  private function is_forminator_available() {
+    return defined( 'FORMINATOR_VERSION' ) || function_exists( 'forminator_custom_forms' );
+  }
+
+  /**
+   * Determine whether Gravity Forms is loaded.
+   *
+   * @return bool
+   */
+  private function is_gravity_forms_available() {
+    return class_exists( 'GFForms' );
+  }
+  
+  // /**
+  //  * Determine whether Ninja Forms is loaded.
+  //  *
+  //  * @return bool
+  //  */
+  // private function is_ninja_forms_available() {
+  //   return defined( 'NINJA_FORMS_VERSION' ) || class_exists( 'Ninja_Forms' ) || function_exists( 'Ninja_Forms' );
+  // }
+
+  /**
+   * Determine whether WPForms is loaded.
+   *
+   * @return bool
+   */
+  private function is_wpforms_available() {
+    return defined( 'WPFORMS_VERSION' ) || function_exists( 'wpforms' ) || class_exists( '\\WPForms\\WPForms' );
+  }
+  
 }

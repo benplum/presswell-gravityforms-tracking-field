@@ -39,7 +39,6 @@ trait PWTSR_Ninja_Forms_Trait {
     }
 
     add_filter( 'ninja_forms_register_fields', [ $this, 'register_ninja_forms_tracking_field_type' ], 20, 1 );
-    add_filter( 'ninja_forms_field_settings', [ $this, 'register_ninja_forms_tracking_field_settings' ], 20, 1 );
     add_action( 'ninja_forms_display_init', [ $this, 'maybe_enqueue_ninja_forms_assets' ], 20, 1 );
     add_filter( 'ninja_forms_display_after_fields', [ $this, 'render_ninja_forms_transceiver_markup' ], 20, 3 );
     add_action( 'ninja_forms_save_form', [ $this, 'auto_setup_ninja_tracking_fields' ], 30, 1 );
@@ -64,13 +63,9 @@ trait PWTSR_Ninja_Forms_Trait {
       return;
     }
 
-    $keys = $this->service->get_tracking_keys( PWTSR::ADAPTER_NINJA_FORMS );
-    if ( empty( $keys ) ) {
+    if ( ! empty( $this->get_ninja_tracking_field_ids_for_form( $form_id ) ) ) {
       return;
     }
-
-    $existing_map = $this->get_ninja_tracking_field_map_for_form( $form_id );
-    $existing_keys = array_fill_keys( array_values( $existing_map ), true );
 
     $fields = Ninja_Forms()->form( $form_id )->get_fields();
     $max_order = 0;
@@ -87,41 +82,24 @@ trait PWTSR_Ninja_Forms_Trait {
       }
     }
 
-    $created = 0;
-
-    foreach ( $keys as $key ) {
-      $clean_key = sanitize_key( $key );
-      if ( '' === $clean_key || isset( $existing_keys[ $clean_key ] ) ) {
-        continue;
-      }
-
-      $max_order += 1;
-
-      $field = Ninja_Forms()->form( $form_id )->field()->get();
-      if ( ! is_object( $field ) || ! method_exists( $field, 'update_settings' ) || ! method_exists( $field, 'save' ) ) {
-        continue;
-      }
-
-      $label = sprintf( __( 'Tracking: %s', PWTSR::TEXT_DOMAIN ), $clean_key );
-
-      $field->update_settings(
-        [
-          'type'               => $this->ninja_tracking_field_type,
-          'label'              => $label,
-          'admin_label'        => $label,
-          'key'                => 'tracking_' . $clean_key,
-          'pwtsr_tracking_key' => $clean_key,
-          'default'            => '',
-          'order'              => $max_order,
-          'required'           => 0,
-        ]
-      )->save();
-
-      $existing_keys[ $clean_key ] = true;
-      $created += 1;
+    $field = Ninja_Forms()->form( $form_id )->field()->get();
+    if ( ! is_object( $field ) || ! method_exists( $field, 'update_settings' ) || ! method_exists( $field, 'save' ) ) {
+      return;
     }
 
-    if ( $created > 0 && class_exists( 'WPN_Helper' ) ) {
+    $field->update_settings(
+      [
+        'type'        => $this->ninja_tracking_field_type,
+        'label'       => __( 'Tracking', PWTSR::TEXT_DOMAIN ),
+        'admin_label' => __( 'Tracking', PWTSR::TEXT_DOMAIN ),
+        'key'         => 'tracking_signals',
+        'default'     => '',
+        'order'       => $max_order + 1,
+        'required'    => 0,
+      ]
+    )->save();
+
+    if ( class_exists( 'WPN_Helper' ) ) {
       if ( method_exists( 'WPN_Helper', 'delete_nf_cache' ) ) {
         WPN_Helper::delete_nf_cache( $form_id );
       }
@@ -158,7 +136,7 @@ trait PWTSR_Ninja_Forms_Trait {
       protected $_type = 'presswell_tracking';
       protected $_templates = 'hidden';
       protected $_wrap_template = 'wrap-no-label';
-      protected $_settings_only = array( 'pwtsr_tracking_key', 'key', 'label', 'default', 'admin_label' );
+      protected $_settings_only = array( 'key', 'label', 'default', 'admin_label' );
 
       public function __construct() {
         parent::__construct();
@@ -170,49 +148,6 @@ trait PWTSR_Ninja_Forms_Trait {
     };
 
     return $fields;
-  }
-
-  /**
-   * Register custom field settings for Presswell tracking fields.
-   *
-   * @param array $settings Ninja field settings config.
-   *
-   * @return array
-   */
-  public function register_ninja_forms_tracking_field_settings( $settings ) {
-    if ( ! is_array( $settings ) ) {
-      $settings = [];
-    }
-
-    $options = [];
-    foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_NINJA_FORMS ) as $key ) {
-      $options[] = [
-        'label' => $key,
-        'value' => $key,
-      ];
-    }
-
-    if ( empty( $options ) ) {
-      $options[] = [
-        'label' => 'utm_source',
-        'value' => 'utm_source',
-      ];
-    }
-
-    if ( ! isset( $settings['pwtsr_tracking_key'] ) ) {
-      $settings['pwtsr_tracking_key'] = [
-        'name'    => 'pwtsr_tracking_key',
-        'type'    => 'select',
-        'label'   => esc_html__( 'Tracking Key', PWTSR::TEXT_DOMAIN ),
-        'width'   => 'full',
-        'group'   => 'primary',
-        'value'   => $options[0]['value'],
-        'options' => $options,
-        'help'    => esc_html__( 'Choose which tracking signal this field stores.', PWTSR::TEXT_DOMAIN ),
-      ];
-    }
-
-    return $settings;
   }
 
   /**
@@ -239,16 +174,7 @@ trait PWTSR_Ninja_Forms_Trait {
       return $after_fields;
     }
 
-    $form_id = absint( $form_id );
-
-    $keys = [];
-    if ( $form_id ) {
-      $keys = array_values( array_unique( array_values( $this->get_ninja_tracking_field_map_for_form( $form_id ) ) ) );
-    }
-
-    if ( empty( $keys ) ) {
-      $keys = $this->service->get_tracking_keys( PWTSR::ADAPTER_NINJA_FORMS );
-    }
+    $keys = $this->service->get_tracking_keys( PWTSR::ADAPTER_NINJA_FORMS );
 
     $inputs = [];
     foreach ( $keys as $key ) {
@@ -306,11 +232,29 @@ trait PWTSR_Ninja_Forms_Trait {
       return $form_data;
     }
 
-    $pairs = $this->extract_ninja_tracking_pairs_from_form_data( $form_data, $form_id );
+    $pairs = $this->collect_ninja_tracking_pairs_from_request();
+    if ( empty( $pairs ) ) {
+      $pairs = $this->extract_ninja_tracking_pairs_from_form_data( $form_data );
+    }
 
     if ( empty( $pairs ) ) {
       $this->current_ninja_tracking_pairs = [];
       return $form_data;
+    }
+
+    if ( isset( $form_data['fields'] ) && is_array( $form_data['fields'] ) ) {
+      foreach ( $form_data['fields'] as &$field_data ) {
+        if ( ! is_array( $field_data ) || ! isset( $field_data['type'] ) ) {
+          continue;
+        }
+
+        if ( $this->ninja_tracking_field_type !== (string) $field_data['type'] ) {
+          continue;
+        }
+
+        $field_data['value'] = wp_json_encode( $pairs );
+      }
+      unset( $field_data );
     }
 
     if ( ! isset( $form_data['extra'] ) || ! is_array( $form_data['extra'] ) ) {
@@ -353,18 +297,6 @@ trait PWTSR_Ninja_Forms_Trait {
               'label'    => __( 'Tracking: All Signals', PWTSR::TEXT_DOMAIN ),
               'callback' => 'tracking_all',
             ],
-            // [
-            //   'id'       => 'tracking_all_dot',
-            //   'tag'      => '{tracking.all}',
-            //   'label'    => __( 'Tracking: All Signals (Dot)', PWTSR::TEXT_DOMAIN ),
-            //   'callback' => 'tracking_all',
-            // ],
-            // [
-            //   'id'       => 'tracking_all_us',
-            //   'tag'      => '{tracking_all}',
-            //   'label'    => __( 'Tracking: All Signals (Underscore)', PWTSR::TEXT_DOMAIN ),
-            //   'callback' => 'tracking_all',
-            // ],
           ];
 
           foreach ( $service->get_tracking_keys( PWTSR::ADAPTER_NINJA_FORMS ) as $key ) {
@@ -377,20 +309,6 @@ trait PWTSR_Ninja_Forms_Trait {
               'label'    => $label,
               'callback' => $callback,
             ];
-
-            // $this->merge_tags[] = [
-            //   'id'       => 'tracking_dot_' . sanitize_key( $key ),
-            //   'tag'      => '{tracking.' . $key . '}',
-            //   'label'    => $label,
-            //   'callback' => $callback,
-            // ];
-
-            // $this->merge_tags[] = [
-            //   'id'       => 'tracking_us_' . sanitize_key( $key ),
-            //   'tag'      => '{tracking_' . $key . '}',
-            //   'label'    => $label,
-            //   'callback' => $callback,
-            // ];
 
             $this->callback_to_key[ $callback ] = $key;
           }
@@ -509,94 +427,83 @@ trait PWTSR_Ninja_Forms_Trait {
   }
 
   /**
-   * Extract tracking values from Ninja submitted custom tracking fields.
-   *
-   * @param array $form_data Form submission payload.
-   * @param int   $form_id   Ninja form id.
+   * Read transceiver payload from request and sanitize known tracking keys.
    *
    * @return array
    */
-  private function extract_ninja_tracking_pairs_from_form_data( $form_data, $form_id ) {
-    $pairs = [];
-
-    if ( ! isset( $form_data['fields'] ) || ! is_array( $form_data['fields'] ) ) {
-      return $pairs;
+  private function collect_ninja_tracking_pairs_from_request() {
+    if ( ! isset( $_POST['pwtsr_transceiver'] ) || ! is_array( $_POST['pwtsr_transceiver'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+      return [];
     }
 
-    $field_map = $this->get_ninja_tracking_field_map_for_form( $form_id );
-    if ( empty( $field_map ) ) {
-      return $pairs;
-    }
+    $raw = wp_unslash( $_POST['pwtsr_transceiver'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-    foreach ( $field_map as $field_id => $tracking_key ) {
-      if ( ! isset( $form_data['fields'][ $field_id ] ) || ! is_array( $form_data['fields'][ $field_id ] ) ) {
-        continue;
-      }
-
-      $raw = isset( $form_data['fields'][ $field_id ]['value'] ) ? $form_data['fields'][ $field_id ]['value'] : '';
-      if ( is_array( $raw ) ) {
-        continue;
-      }
-
-      $clean = $this->service->sanitize_tracking_value( $tracking_key, $raw );
-      if ( '' !== $clean ) {
-        $pairs[ $tracking_key ] = $clean;
-      }
-    }
-
-    return $pairs;
+    return $this->normalize_ninja_tracking_pairs( $raw );
   }
 
   /**
-   * Build map of custom tracking field id => tracking key for a form.
+   * Fallback extractor when direct transceiver request payload is unavailable.
    *
-   * @param int $form_id Ninja form id.
+   * @param array $form_data Ninja submit payload.
    *
    * @return array
    */
-  private function get_ninja_tracking_field_map_for_form( $form_id ) {
-    $map = [];
+  private function extract_ninja_tracking_pairs_from_form_data( $form_data ) {
+    if ( ! isset( $form_data['fields'] ) || ! is_array( $form_data['fields'] ) ) {
+      return [];
+    }
+
+    foreach ( $form_data['fields'] as $field ) {
+      if ( ! is_array( $field ) || ! isset( $field['type'] ) || $this->ninja_tracking_field_type !== (string) $field['type'] ) {
+        continue;
+      }
+
+      $value = isset( $field['value'] ) ? $field['value'] : '';
+      $pairs = $this->normalize_ninja_tracking_pairs( $value );
+      if ( ! empty( $pairs ) ) {
+        return $pairs;
+      }
+    }
+
+    return [];
+  }
+
+  /**
+   * Return Tracking field ids present in a Ninja form.
+   *
+   * @param int $form_id Ninja form id.
+   *
+   * @return int[]
+   */
+  private function get_ninja_tracking_field_ids_for_form( $form_id ) {
+    $ids = [];
 
     $form_id = absint( $form_id );
-    if ( ! $form_id ) {
-      return $map;
+    if ( ! $form_id || ! function_exists( 'Ninja_Forms' ) ) {
+      return $ids;
     }
 
     $fields = Ninja_Forms()->form( $form_id )->get_fields();
     if ( ! is_array( $fields ) ) {
-      return $map;
+      return $ids;
     }
-
-    $allowed = array_flip( $this->service->get_tracking_keys( PWTSR::ADAPTER_NINJA_FORMS ) );
 
     foreach ( $fields as $field ) {
       if ( ! is_object( $field ) || ! method_exists( $field, 'get_id' ) || ! method_exists( $field, 'get_setting' ) ) {
         continue;
       }
 
-      $type = (string) $field->get_setting( 'type' );
-      if ( $this->ninja_tracking_field_type !== $type ) {
+      if ( $this->ninja_tracking_field_type !== (string) $field->get_setting( 'type' ) ) {
         continue;
       }
 
       $field_id = absint( $field->get_id() );
-      if ( ! $field_id ) {
-        continue;
+      if ( $field_id ) {
+        $ids[] = $field_id;
       }
-
-      $tracking_key = sanitize_key( (string) $field->get_setting( 'pwtsr_tracking_key' ) );
-      if ( '' === $tracking_key ) {
-        // Backward compatibility for forms configured before the dropdown existed.
-        $tracking_key = sanitize_key( (string) $field->get_setting( 'key' ) );
-      }
-      if ( '' === $tracking_key || ! isset( $allowed[ $tracking_key ] ) ) {
-        continue;
-      }
-
-      $map[ $field_id ] = $tracking_key;
     }
 
-    return $map;
+    return array_values( array_unique( $ids ) );
   }
 
   /**
@@ -610,40 +517,74 @@ trait PWTSR_Ninja_Forms_Trait {
   private function get_ninja_forms_tracking_pairs_from_submission( $sub, $form_id ) {
     $pairs = [];
 
-    $field_map = $this->get_ninja_tracking_field_map_for_form( $form_id );
-    foreach ( $field_map as $field_id => $tracking_key ) {
+    foreach ( $this->get_ninja_tracking_field_ids_for_form( $form_id ) as $field_id ) {
       if ( ! method_exists( $sub, 'get_field_value' ) ) {
         continue;
       }
 
-      $value = $sub->get_field_value( $field_id );
-      $clean = $this->service->sanitize_tracking_value( $tracking_key, $value );
-      if ( '' !== $clean ) {
-        $pairs[ $tracking_key ] = $clean;
+      $field_pairs = $this->normalize_ninja_tracking_pairs( $sub->get_field_value( $field_id ) );
+      if ( ! empty( $field_pairs ) ) {
+        $pairs = $field_pairs;
+        break;
       }
     }
 
     if ( method_exists( $sub, 'get_extra_value' ) ) {
-      $extra = $sub->get_extra_value( 'pwtsr_tracking' );
-      $extra = maybe_unserialize( $extra );
-
-      if ( is_array( $extra ) ) {
-        foreach ( $extra as $key => $value ) {
-          $clean_key = sanitize_key( $key );
-          if ( '' === $clean_key ) {
-            continue;
-          }
-
-          $clean_value = $this->service->sanitize_tracking_value( $clean_key, $value );
-          if ( '' !== $clean_value && ! isset( $pairs[ $clean_key ] ) ) {
-            $pairs[ $clean_key ] = $clean_value;
-          }
-        }
+      $extra_pairs = $this->normalize_ninja_tracking_pairs( $sub->get_extra_value( 'pwtsr_tracking' ) );
+      if ( ! empty( $extra_pairs ) ) {
+        $pairs = array_merge( $extra_pairs, $pairs );
       }
     }
 
     if ( empty( $pairs ) ) {
       return $this->get_current_ninja_forms_tracking_pairs();
+    }
+
+    return $pairs;
+  }
+
+  /**
+   * Normalize and sanitize Ninja tracking payload.
+   *
+   * @param mixed $raw Raw payload.
+   *
+   * @return array
+   */
+  private function normalize_ninja_tracking_pairs( $raw ) {
+    if ( is_string( $raw ) ) {
+      $decoded = json_decode( $raw, true );
+      if ( is_array( $decoded ) ) {
+        $raw = $decoded;
+      } else {
+        $raw = maybe_unserialize( $raw );
+      }
+    }
+
+    if ( is_object( $raw ) ) {
+      $raw = (array) $raw;
+    }
+
+    if ( ! is_array( $raw ) ) {
+      return [];
+    }
+
+    $allowed = array_flip( $this->service->get_tracking_keys( PWTSR::ADAPTER_NINJA_FORMS ) );
+    $pairs = [];
+
+    foreach ( $raw as $key => $value ) {
+      $clean_key = sanitize_key( (string) $key );
+      if ( '' === $clean_key || ! isset( $allowed[ $clean_key ] ) ) {
+        continue;
+      }
+
+      if ( is_array( $value ) || is_object( $value ) ) {
+        continue;
+      }
+
+      $clean_value = $this->service->sanitize_tracking_value( $clean_key, $value );
+      if ( '' !== $clean_value ) {
+        $pairs[ $clean_key ] = $clean_value;
+      }
     }
 
     return $pairs;
