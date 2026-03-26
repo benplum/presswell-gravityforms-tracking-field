@@ -5,7 +5,7 @@
   }
 
   var config = window.presswellSignalRelayConfig || {};
-  var storageKey = config.storageKey || 'presswellSignalRelay';
+  var storageKey = config.storageKey || 'pwSignalRelay';
   var ttlMs = Math.max(parseInt(config.ttl, 10) || 0, 0) * 1000;
   var transceiverKeys = Array.isArray(config.transceiverKeys) ? config.transceiverKeys : [];
 
@@ -161,12 +161,14 @@
     }
 
     forms.forEach(function (form) {
-      if (form.querySelector('[data-presswell-transceiver-forminator="1"]')) {
+      if (form.querySelector('[data-presswell-transceiver-adapter="forminator"]')) {
         return;
       }
 
       var wrapper = document.createElement('div');
-      wrapper.setAttribute('data-presswell-transceiver-forminator', '1');
+      wrapper.className = 'presswell-transceiver presswell-forminator-transceiver';
+      wrapper.setAttribute('data-presswell-transceiver', '1');
+      wrapper.setAttribute('data-presswell-transceiver-adapter', 'forminator');
       wrapper.setAttribute('aria-hidden', 'true');
       wrapper.style.display = 'none';
 

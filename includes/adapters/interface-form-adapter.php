@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Contract implemented by all form integration adapters.
  */
-interface PWSL_Form_Adapter_Interface {
+interface PWTSR_Form_Adapter_Interface {
 
   /**
    * Return the adapter key used for registration and lookup.

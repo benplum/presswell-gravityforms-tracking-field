@@ -1,4 +1,4 @@
-=== Presswell Signal Relay ===
+=== Presswell Tracking Signal Relay ===
 Contributors: presswell, benplum
 Tags: gravity forms, forminator, contact form 7, attribution, utm, tracking, hidden field, marketing, click id
 Requires at least: 6.1
@@ -11,7 +11,7 @@ Capture UTM and click tracking parameters across a visitor session.
 
 == Description ==
 
-Presswell Signal Relay captures attribution parameters and stores them with supported form plugin submissions.
+Presswell Tracking Signal Relay captures attribution parameters and stores them with supported form plugin submissions.
 
 **Features**
 
@@ -35,11 +35,11 @@ When a supported form renders, hidden inputs are generated and populated automat
 
 ***Compatibility Note***
 
-Presswell Signal Relay is a new plugin baseline. Legacy helper functions and legacy `presswell_gf_*` / `presswell_forminator_*` filter hooks are not included.
+Presswell Tracking Signal Relay is a new plugin baseline. Legacy helper functions and legacy `presswell_gf_*` / `presswell_forminator_*` filter hooks are not included.
 
 = Documentation =
 
-**presswell_signal_relay_tracking_keys( $keys, $context )**
+**presswell_tracking_signal_relay_tracking_keys( $keys, $context )**
 
 * **$keys** (array) (required) - Ordered list of tracking keys that should be captured and stored with each entry.
 * **$context** (string) (required) - Adapter context (`core`, `gravityforms`, `forminator`, or `contactform7`).
@@ -49,7 +49,7 @@ Presswell Signal Relay is a new plugin baseline. Legacy helper functions and leg
 Example:
 
 `
-add_filter( 'presswell_signal_relay_tracking_keys', function( $keys, $context ) {
+add_filter( 'presswell_tracking_signal_relay_tracking_keys', function( $keys, $context ) {
     if ( 'gravityforms' !== $context ) {
         return $keys;
     }
@@ -59,7 +59,7 @@ add_filter( 'presswell_signal_relay_tracking_keys', function( $keys, $context ) 
 }, 10, 2 );
 `
 
-**presswell_signal_relay_tracking_ttl( $ttl, $context )**
+**presswell_tracking_signal_relay_tracking_ttl( $ttl, $context )**
 
 * **$ttl** (int) (required) - Session storage lifetime in seconds. Default is `3600` (1 hour).
 * **$context** (string) (required) - Adapter context (`core`, `gravityforms`, `forminator`, or `contactform7`).
@@ -68,7 +68,7 @@ add_filter( 'presswell_signal_relay_tracking_keys', function( $keys, $context ) 
 Example:
 
 `
-add_filter( 'presswell_signal_relay_tracking_ttl', function( $ttl, $context ) {
+add_filter( 'presswell_tracking_signal_relay_tracking_ttl', function( $ttl, $context ) {
     if ( 'core' !== $context ) {
         return $ttl;
     }
@@ -76,7 +76,7 @@ add_filter( 'presswell_signal_relay_tracking_ttl', function( $ttl, $context ) {
 }, 10, 2 );
 `
 
-**presswell_signal_relay_storage_key( $storage_key, $context )**
+**presswell_tracking_signal_relay_storage_key( $storage_key, $context )**
 
 * **$storage_key** (string) (required) - Browser storage key used for attribution payload.
 * **$context** (string) (required) - Adapter context (`core`, `gravityforms`, `forminator`, or `contactform7`).
@@ -107,13 +107,13 @@ By default, transceiver values are not auto-appended to mail bodies.
 Enable auto-append with:
 
 `
-add_filter( 'presswell_signal_relay_cf7_auto_append_tracking', '__return_true' );
+add_filter( 'presswell_tracking_signal_relay_cf7_auto_append_tracking', '__return_true' );
 `
 
 Optional custom section label:
 
 `
-add_filter( 'presswell_signal_relay_cf7_tracking_label', function() {
+add_filter( 'presswell_tracking_signal_relay_cf7_tracking_label', function() {
     return 'Attribution';
 } );
 `
@@ -155,11 +155,11 @@ No. The plugin injects and populates the field automatically when a form contain
 
 = How long is attribution data stored? =
 
-By default, one hour. You can change the TTL with the `presswell_signal_relay_tracking_ttl` filter.
+By default, one hour. You can change the TTL with the `presswell_tracking_signal_relay_tracking_ttl` filter.
 
 = Can I track additional custom parameters? =
 
-Yes. Use the `presswell_signal_relay_tracking_keys` filter to add or remove keys.
+Yes. Use the `presswell_tracking_signal_relay_tracking_keys` filter to add or remove keys.
 
 == Screenshots ==
 
@@ -174,10 +174,10 @@ Yes. Use the `presswell_signal_relay_tracking_keys` filter to add or remove keys
 * Added adapter-aware script localization context handling.
 
 = 1.1.0 =
-* Renamed plugin to Presswell Signal Relay.
+* Renamed plugin to Presswell Tracking Signal Relay.
 * Added adapter architecture for Gravity Forms and Forminator.
 * Added centralized constants and service layers.
-* Standardized filter API under `presswell_signal_relay_*` hooks.
+* Standardized filter API under `presswell_tracking_signal_relay_*` hooks.
 
 = 1.0.0 =
 * Initial release.

@@ -5,11 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Forminator adapter for Presswell Tracking Signal Relay.
+ * Fluent Forms adapter for Presswell Tracking Signal Relay.
  */
-class PWTSR_Forminator_Adapter implements PWTSR_Form_Adapter_Interface {
+class PWTSR_Fluent_Forms_Adapter implements PWTSR_Form_Adapter_Interface {
   use PWTSR_Adapter_Assets_Trait;
-  use PWTSR_Forminator_Trait;
+  use PWTSR_Fluent_Forms_Trait;
 
   /**
    * Shared tracking service instance.
@@ -45,13 +45,13 @@ class PWTSR_Forminator_Adapter implements PWTSR_Form_Adapter_Interface {
    * @return string
    */
   public function key() {
-    return PWTSR::ADAPTER_FORMINATOR;
+    return PWTSR::ADAPTER_FLUENT_FORMS;
   }
 
   /**
    * Register adapter boot hooks.
    */
   public function register() {
-    $this->maybe_bootstrap_forminator();
+    $this->maybe_bootstrap_fluent_forms();
   }
 }

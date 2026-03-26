@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Shared tracking service used by all form adapters.
  */
-class PWSL_Tracking_Service {
+class PWTSR_Tracking_Service {
 
   /**
    * Return tracking keys for a specific adapter context.
@@ -17,7 +17,7 @@ class PWSL_Tracking_Service {
    * @return string[]
    */
   public function get_tracking_keys( $context = 'core' ) {
-    $keys = apply_filters( 'presswell_signal_relay_tracking_keys', PWSL::default_tracking_keys(), $context );
+    $keys = apply_filters( 'presswell_tracking_signal_relay_tracking_keys', PWTSR::DEFAULT_TRACKING_KEYS, $context );
 
     return $this->sanitize_keys( $keys );
   }
@@ -30,9 +30,9 @@ class PWSL_Tracking_Service {
    * @return int
    */
   public function get_ttl_seconds( $context = 'core' ) {
-    $ttl = (int) apply_filters( 'presswell_signal_relay_tracking_ttl', PWSL::TTL_SECONDS, $context );
+    $ttl = (int) apply_filters( 'presswell_tracking_signal_relay_tracking_ttl', PWTSR::TTL_SECONDS, $context );
 
-    return $ttl > 0 ? $ttl : PWSL::TTL_SECONDS;
+    return $ttl > 0 ? $ttl : PWTSR::TTL_SECONDS;
   }
 
   /**
@@ -43,9 +43,9 @@ class PWSL_Tracking_Service {
    * @return array
    */
   public function get_client_config( $context = 'core' ) {
-    $storage_key = (string) apply_filters( 'presswell_signal_relay_storage_key', PWSL::STORAGE_KEY, $context );
+    $storage_key = (string) apply_filters( 'presswell_tracking_signal_relay_storage_key', PWTSR::STORAGE_KEY, $context );
     if ( '' === $storage_key ) {
-      $storage_key = PWSL::STORAGE_KEY;
+      $storage_key = PWTSR::STORAGE_KEY;
     }
 
     return [
@@ -100,10 +100,10 @@ class PWSL_Tracking_Service {
     }
 
     if ( function_exists( 'mb_substr' ) ) {
-      return mb_substr( $value, 0, PWSL::MAX_VALUE_LENGTH );
+      return mb_substr( $value, 0, PWTSR::MAX_VALUE_LENGTH );
     }
 
-    return substr( $value, 0, PWSL::MAX_VALUE_LENGTH );
+    return substr( $value, 0, PWTSR::MAX_VALUE_LENGTH );
   }
 
   /**
@@ -115,7 +115,7 @@ class PWSL_Tracking_Service {
    */
   private function sanitize_keys( $keys ) {
     if ( ! is_array( $keys ) ) {
-      return PWSL::default_tracking_keys();
+      return PWTSR::DEFAULT_TRACKING_KEYS;
     }
 
     $sanitized = [];
@@ -134,6 +134,6 @@ class PWSL_Tracking_Service {
 
     $sanitized = array_values( array_unique( $sanitized ) );
 
-    return ! empty( $sanitized ) ? $sanitized : PWSL::default_tracking_keys();
+    return ! empty( $sanitized ) ? $sanitized : PWTSR::DEFAULT_TRACKING_KEYS;
   }
 }

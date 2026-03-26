@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Forminator integration hooks.
  */
-trait PWSL_Forminator_Trait {
+trait PWTSR_Forminator_Trait {
 
   /**
    * Initialize Forminator hooks when available.
@@ -27,7 +27,7 @@ trait PWSL_Forminator_Trait {
    * Enqueue front-end tracking script for Forminator forms.
    */
   public function maybe_enqueue_forminator_assets() {
-    $this->enqueue_tracking_script( PWSL::ADAPTER_FORMINATOR );
+    $this->enqueue_tracking_script( PWTSR::ADAPTER_FORMINATOR );
   }
 
   /**
@@ -42,15 +42,16 @@ trait PWSL_Forminator_Trait {
       return $html;
     }
 
-    if ( false !== strpos( $html, 'data-presswell-transceiver-forminator="1"' ) ) {
+    if ( false !== strpos( $html, 'data-presswell-transceiver-adapter="forminator"' ) ) {
       return $html;
     }
 
     $inputs = [];
     foreach ( $this->service->get_tracking_keys( 'forminator' ) as $key ) {
-      $inputs[] = sprintf(
-        '<input type="hidden" name="%1$s" value="" data-presswell-transceiver="%1$s" />',
-        esc_attr( $key )
+      $inputs[] = $this->render_transceiver_input_markup(
+        $key,
+        $key,
+        'presswell-forminator-' . sanitize_html_class( $key )
       );
     }
 
@@ -58,10 +59,7 @@ trait PWSL_Forminator_Trait {
       return $html;
     }
 
-    $wrapper = sprintf(
-      '<div class="presswell-forminator-transceiver" data-presswell-transceiver-forminator="1" style="display:none" aria-hidden="true">%s</div>',
-      implode( '', $inputs )
-    );
+    $wrapper = $this->wrap_transceiver_inputs_markup( 'forminator', implode( '', $inputs ) );
 
     return preg_replace( '/<\/form>/i', $wrapper . '</form>', $html, 1 );
   }

@@ -5,16 +5,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Contact Form 7 adapter for Presswell Signal Relay.
+ * Contact Form 7 adapter for Presswell Tracking Signal Relay.
  */
-class PWSL_Contact_Form_7_Adapter implements PWSL_Form_Adapter_Interface {
-  use PWSL_Adapter_Assets_Trait;
-  use PWSL_Contact_Form_7_Trait;
+class PWTSR_Contact_Form_7_Adapter implements PWTSR_Form_Adapter_Interface {
+  use PWTSR_Adapter_Assets_Trait;
+  use PWTSR_Contact_Form_7_Trait;
 
   /**
    * Shared tracking service instance.
    *
-   * @var PWSL_Tracking_Service
+   * @var PWTSR_Tracking_Service
    */
   private $service;
 
@@ -33,9 +33,9 @@ class PWSL_Contact_Form_7_Adapter implements PWSL_Form_Adapter_Interface {
   private $localized_objects = [];
 
   /**
-   * @param PWSL_Tracking_Service $service Shared tracking service.
+   * @param PWTSR_Tracking_Service $service Shared tracking service.
    */
-  public function __construct( PWSL_Tracking_Service $service ) {
+  public function __construct( PWTSR_Tracking_Service $service ) {
     $this->service = $service;
   }
 
@@ -45,13 +45,13 @@ class PWSL_Contact_Form_7_Adapter implements PWSL_Form_Adapter_Interface {
    * @return string
    */
   public function key() {
-    return PWSL::ADAPTER_CONTACT_FORM_7;
+    return PWTSR::ADAPTER_CONTACT_FORM_7;
   }
 
   /**
    * Register adapter boot hooks.
    */
   public function register() {
-    add_action( 'plugins_loaded', [ $this, 'maybe_bootstrap_contact_form_7' ], 20 );
+    $this->maybe_bootstrap_contact_form_7();
   }
 }

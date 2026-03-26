@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Contact Form 7 integration hooks.
  */
-trait PWSL_Contact_Form_7_Trait {
+trait PWTSR_Contact_Form_7_Trait {
 
   /**
    * Initialize Contact Form 7 hooks when available.
@@ -29,7 +29,7 @@ trait PWSL_Contact_Form_7_Trait {
    * Enqueue front-end tracking script for Contact Form 7 forms.
    */
   public function maybe_enqueue_contact_form_7_assets() {
-    $this->enqueue_tracking_script( PWSL::ADAPTER_CONTACT_FORM_7 );
+    $this->enqueue_tracking_script( PWTSR::ADAPTER_CONTACT_FORM_7 );
   }
 
   /**
@@ -40,15 +40,16 @@ trait PWSL_Contact_Form_7_Trait {
    * @return string
    */
   public function inject_contact_form_7_tracking_inputs( $html ) {
-    if ( false !== strpos( $html, 'data-presswell-transceiver-cf7="1"' ) ) {
+    if ( false !== strpos( $html, 'data-presswell-transceiver-adapter="cf7"' ) ) {
       return $html;
     }
 
     $inputs = [];
-    foreach ( $this->service->get_tracking_keys( PWSL::ADAPTER_CONTACT_FORM_7 ) as $key ) {
-      $inputs[] = sprintf(
-        '<input type="hidden" name="%1$s" value="" data-presswell-transceiver="%1$s" />',
-        esc_attr( $key )
+    foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_CONTACT_FORM_7 ) as $key ) {
+      $inputs[] = $this->render_transceiver_input_markup(
+        $key,
+        $key,
+        'presswell-cf7-' . sanitize_html_class( $key )
       );
     }
 
@@ -56,10 +57,7 @@ trait PWSL_Contact_Form_7_Trait {
       return $html;
     }
 
-    $wrapper = sprintf(
-      '<div class="presswell-cf7-transceiver" data-presswell-transceiver-cf7="1" style="display:none" aria-hidden="true">%s</div>',
-      implode( '', $inputs )
-    );
+    $wrapper = $this->wrap_transceiver_inputs_markup( 'cf7', implode( '', $inputs ) );
 
     return $html . $wrapper;
   }
@@ -80,7 +78,7 @@ trait PWSL_Contact_Form_7_Trait {
       return $posted_data;
     }
 
-    foreach ( $this->service->get_tracking_keys( PWSL::ADAPTER_CONTACT_FORM_7 ) as $key ) {
+    foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_CONTACT_FORM_7 ) as $key ) {
       $raw = null;
 
       if ( isset( $posted_data[ $key ] ) && ! is_array( $posted_data[ $key ] ) ) {
@@ -100,7 +98,7 @@ trait PWSL_Contact_Form_7_Trait {
   }
 
   /**
-   * Add Signal Relay special mail tags to Contact Form 7 Mail panel suggestions.
+  * Add Tracking Signal Relay special mail tags to Contact Form 7 Mail panel suggestions.
    *
    * @param array $mailtags Existing suggested mail tags.
    *
@@ -111,8 +109,12 @@ trait PWSL_Contact_Form_7_Trait {
       $mailtags = [];
     }
 
-    $mailtags[] = 'tracking-values';
-    // $mailtags[] = 'pwsr_transceiver';
+    $mailtags[] = 'tracking-all';
+    // $mailtags[] = 'tracking-values';
+
+    foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_CONTACT_FORM_7 ) as $key ) {
+      $mailtags[] = 'tracking-' . $key;
+    }
 
     return array_values( array_unique( array_filter( $mailtags ) ) );
   }
@@ -121,27 +123,30 @@ trait PWSL_Contact_Form_7_Trait {
    * Render custom Contact Form 7 special mail tags for transceiver data.
    *
    * Supported tags:
+   * - [tracking-all]
    * - [tracking-values]
+   * - [tracking-{key}]
    * - [pwsr_transceiver]
    *
    * @param string $output Existing output.
    * @param string $name   Special mail tag name.
    * @param bool   $html   Whether HTML output is requested.
-  * @param mixed  $mail_tag Mail tag object when available.
+   * @param mixed  $mail_tag Mail tag object when available.
    *
    * @return string
    */
   public function render_contact_form_7_special_mail_tags( $output, $name, $html, $mail_tag = null ) {
-    if ( ! in_array( (string) $name, [ 'tracking-values', 'pwsr_transceiver'], true ) ) {
+    $pairs = $this->get_contact_form_7_tracking_pairs();
+    if ( empty( $pairs ) ) {
       return $output;
     }
 
-    $pairs = $this->get_contact_form_7_tracking_pairs();
-    if ( empty( $pairs ) ) {
-      return '';
+    $resolved = $this->resolve_contact_form_7_tracking_tag_value( (string) $name, $pairs, (bool) $html );
+    if ( null === $resolved ) {
+      return $output;
     }
 
-    return $this->format_contact_form_7_tracking_pairs( $pairs, (bool) $html );
+    return $resolved;
   }
 
   /**
@@ -155,7 +160,7 @@ trait PWSL_Contact_Form_7_Trait {
    */
   public function append_contact_form_7_tracking_to_mail( $components, $contact_form, $mail ) {
     $enabled = (bool) apply_filters(
-      'presswell_signal_relay_cf7_auto_append_tracking',
+      'presswell_tracking_signal_relay_cf7_auto_append_tracking',
       false,
       $contact_form,
       $mail
@@ -166,7 +171,7 @@ trait PWSL_Contact_Form_7_Trait {
     }
 
     $body = (string) $components['body'];
-    if ( false !== strpos( $body, '[tracking-values]' ) || false !== strpos( $body, '[pwsr_transceiver]' ) ) {
+    if ( $this->contact_form_7_mail_body_has_tracking_tags( $body ) ) {
       return $components;
     }
 
@@ -176,7 +181,7 @@ trait PWSL_Contact_Form_7_Trait {
     }
 
     $is_html = ! empty( $mail['use_html'] );
-    $label   = (string) apply_filters( 'presswell_signal_relay_cf7_tracking_label', 'Tracking' );
+    $label   = (string) apply_filters( 'presswell_tracking_signal_relay_cf7_tracking_label', 'Tracking' );
     $payload = $this->format_contact_form_7_tracking_pairs( $pairs, $is_html );
 
     if ( $is_html ) {
@@ -212,7 +217,7 @@ trait PWSL_Contact_Form_7_Trait {
     }
 
     $pairs = [];
-    foreach ( $this->service->get_tracking_keys( PWSL::ADAPTER_CONTACT_FORM_7 ) as $key ) {
+    foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_CONTACT_FORM_7 ) as $key ) {
       if ( ! isset( $posted_data[ $key ] ) || is_array( $posted_data[ $key ] ) ) {
         continue;
       }
@@ -252,5 +257,54 @@ trait PWSL_Contact_Form_7_Trait {
     }
 
     return implode( "\n", $lines );
+  }
+
+  /**
+   * Resolve a Contact Form 7 tracking special tag value.
+   *
+   * @param string $name  Special mail tag name.
+   * @param array  $pairs Tracking key/value pairs.
+   * @param bool   $html  Whether HTML output is requested.
+   *
+   * @return string|null
+   */
+  private function resolve_contact_form_7_tracking_tag_value( $name, $pairs, $html ) {
+    $normalized = strtolower( trim( (string) $name ) );
+
+    if ( in_array( $normalized, [ 'tracking-all', 'tracking-values', 'pwsr_transceiver' ], true ) ) {
+      return $this->format_contact_form_7_tracking_pairs( $pairs, $html );
+    }
+
+    if ( 0 !== strpos( $normalized, 'tracking-' ) ) {
+      return null;
+    }
+
+    $requested_key = substr( $normalized, strlen( 'tracking-' ) );
+    if ( '' === $requested_key ) {
+      return null;
+    }
+
+    foreach ( $pairs as $key => $value ) {
+      if ( strtolower( (string) $key ) === $requested_key ) {
+        if ( $html ) {
+          return esc_html( $value );
+        }
+
+        return (string) $value;
+      }
+    }
+
+    return '';
+  }
+
+  /**
+   * Determine whether a mail body already contains tracking tags.
+   *
+   * @param string $body Mail body.
+   *
+   * @return bool
+   */
+  private function contact_form_7_mail_body_has_tracking_tags( $body ) {
+    return (bool) preg_match( '/\[(tracking-all|tracking-values|pwsr_transceiver|tracking-[a-z0-9_\-]+)\]/i', (string) $body );
   }
 }

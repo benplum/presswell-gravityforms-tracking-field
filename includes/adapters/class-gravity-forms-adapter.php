@@ -5,16 +5,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gravity Forms adapter for Presswell Signal Relay.
+ * Gravity Forms adapter for Presswell Tracking Signal Relay.
  */
-class PWSL_Gravity_Forms_Adapter implements PWSL_Form_Adapter_Interface {
-  use PWSL_Adapter_Assets_Trait;
-  use PWSL_Gravity_Forms_Trait;
+class PWTSR_Gravity_Forms_Adapter implements PWTSR_Form_Adapter_Interface {
+  use PWTSR_Adapter_Assets_Trait;
+  use PWTSR_Gravity_Forms_Trait;
 
   /**
    * Shared tracking service instance.
    *
-   * @var PWSL_Tracking_Service
+   * @var PWTSR_Tracking_Service
    */
   private $service;
 
@@ -40,9 +40,9 @@ class PWSL_Gravity_Forms_Adapter implements PWSL_Form_Adapter_Interface {
   private $styles_enqueued = false;
 
   /**
-   * @param PWSL_Tracking_Service $service Shared tracking service.
+   * @param PWTSR_Tracking_Service $service Shared tracking service.
    */
-  public function __construct( PWSL_Tracking_Service $service ) {
+  public function __construct( PWTSR_Tracking_Service $service ) {
     $this->service = $service;
   }
 
@@ -52,13 +52,13 @@ class PWSL_Gravity_Forms_Adapter implements PWSL_Form_Adapter_Interface {
    * @return string
    */
   public function key() {
-    return PWSL::ADAPTER_GRAVITY_FORMS;
+    return PWTSR::ADAPTER_GRAVITY_FORMS;
   }
 
   /**
    * Register adapter boot hooks.
    */
   public function register() {
-    add_action( 'plugins_loaded', [ $this, 'maybe_bootstrap_gravity_forms' ], 20 );
+    $this->maybe_bootstrap_gravity_forms();
   }
 }
