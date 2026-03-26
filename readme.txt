@@ -30,8 +30,6 @@ Supported Form Plugins:
 * Tracks `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `gclid`, `fbclid`, `msclkid`, `ttclid`, `landing_page`, `landing_query`, and `referrer`
 * Persists values in browser localStorage for the visitor session (1-hour TTL by default)
 * Automatically populates hidden field inputs when forms render
-* Uses adapter-based integrations so additional form systems can be added cleanly
-* Enforces a single tracking field per Gravity Forms form to avoid duplicate data
 
 ***Session Attribution Storage***
 
@@ -103,24 +101,6 @@ An alias is also supported:
 `
 
 Each tag outputs non-empty values as key/value lines.
-
-**Optional Auto-Append for Contact Form 7 Mail**
-
-By default, transceiver values are not auto-appended to mail bodies.
-
-Enable auto-append with:
-
-`
-add_filter( 'pwtsr_cf7_auto_append_tracking', '__return_true' );
-`
-
-Optional custom section label:
-
-`
-add_filter( 'pwtsr_cf7_tracking_label', function() {
-    return 'Attribution';
-} );
-`
 
 **Default Tracking Keys**
 

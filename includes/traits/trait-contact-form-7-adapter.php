@@ -22,7 +22,6 @@ trait PWTSR_Contact_Form_7_Trait {
     add_filter( 'wpcf7_posted_data', [ $this, 'sanitize_contact_form_7_posted_data' ], 20, 1 );
     add_filter( 'wpcf7_collect_mail_tags', [ $this, 'add_contact_form_7_mail_tag_suggestions' ], 20, 3 );
     add_filter( 'wpcf7_special_mail_tags', [ $this, 'render_contact_form_7_special_mail_tags' ], 20, 4 );
-    add_filter( 'wpcf7_mail_components', [ $this, 'append_contact_form_7_tracking_to_mail' ], 20, 3 );
   }
 
   /**
@@ -150,53 +149,6 @@ trait PWTSR_Contact_Form_7_Trait {
   }
 
   /**
-   * Optionally append transceiver data to outgoing Contact Form 7 emails.
-   *
-   * @param array $components Mail components.
-   * @param mixed $contact_form Contact Form 7 form object.
-   * @param array $mail Mail configuration.
-   *
-   * @return array
-   */
-  public function append_contact_form_7_tracking_to_mail( $components, $contact_form, $mail ) {
-    $enabled = (bool) apply_filters(
-      'pwtsr_cf7_auto_append_tracking',
-      false,
-      $contact_form,
-      $mail
-    );
-
-    if ( ! $enabled || ! is_array( $components ) || empty( $components['body'] ) ) {
-      return $components;
-    }
-
-    $body = (string) $components['body'];
-    if ( $this->contact_form_7_mail_body_has_tracking_tags( $body ) ) {
-      return $components;
-    }
-
-    $pairs = $this->get_contact_form_7_tracking_pairs();
-    if ( empty( $pairs ) ) {
-      return $components;
-    }
-
-    $is_html = ! empty( $mail['use_html'] );
-    $label   = (string) apply_filters( 'pwtsr_cf7_tracking_label', 'Tracking' );
-    $payload = $this->format_contact_form_7_tracking_pairs( $pairs, $is_html );
-
-    if ( $is_html ) {
-      $section = sprintf( '<p><strong>%s:</strong><br />%s</p>', esc_html( $label ), $payload );
-      $components['body'] = $body . "\n\n" . $section;
-      return $components;
-    }
-
-    $section = sprintf( "%s:\n%s", $label, $payload );
-    $components['body'] = $body . "\n\n" . $section;
-
-    return $components;
-  }
-
-  /**
    * Resolve sanitized transceiver pairs from current Contact Form 7 submission.
    *
    * @return array
@@ -297,14 +249,4 @@ trait PWTSR_Contact_Form_7_Trait {
     return '';
   }
 
-  /**
-   * Determine whether a mail body already contains tracking tags.
-   *
-   * @param string $body Mail body.
-   *
-   * @return bool
-   */
-  private function contact_form_7_mail_body_has_tracking_tags( $body ) {
-    return (bool) preg_match( '/\[(tracking-all|tracking-values|pwsr_transceiver|tracking-[a-z0-9_\-]+)\]/i', (string) $body );
-  }
 }
