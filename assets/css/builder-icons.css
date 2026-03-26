@@ -21,9 +21,17 @@
   margin-right: 6px;
 }
 
-.frm_add_field .pwtsr-radar-icon {
-  margin-right: 6px;
+/* Forminator */
+
+.field_type_list li.frmbutton.frm_tpresswell_transceiver .frmsvg {
+  height: 18px;
+  width: 18px;
+  
+  margin-left: 3px;
+  margin-right: 3px;
 }
+
+/* WPForms */
 
 .wpforms-add-fields-button .pwtsr-radar-icon {
   background-image: url('../svg/radar-white.svg');

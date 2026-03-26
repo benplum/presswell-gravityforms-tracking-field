@@ -63,8 +63,12 @@ trait PWTSR_Formidable_Trait {
     }
 
     $path_data = '';
-    if ( preg_match( '/<path[^>]*d="([^"]+)"[^>]*>/i', $svg_markup, $path_match ) ) {
-      $path_data = $path_match[1];
+    if ( preg_match( '/<path\b[^>]*>/i', $svg_markup, $path_tag_match ) ) {
+      if ( preg_match( '/\bd\s*=\s*"([^"]+)"/i', $path_tag_match[0], $path_match ) ) {
+        $path_data = $path_match[1];
+      } elseif ( preg_match( '/\bd\s*=\s*\'([^\']+)\'/i', $path_tag_match[0], $path_match ) ) {
+        $path_data = $path_match[1];
+      }
     }
 
     if ( '' === $path_data ) {
