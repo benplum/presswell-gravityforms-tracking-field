@@ -29,6 +29,8 @@ trait PWTSR_Formidable_Trait {
     add_filter( 'frm_pre_create_entry', [ $this, 'sanitize_formidable_submission_values' ], 20, 1 );
     add_action( 'frm_after_create_entry', [ $this, 'persist_formidable_tracking_values' ], 20, 3 );
     add_action( 'frm_show_entry', [ $this, 'render_formidable_tracking_block' ], 20, 1 );
+    add_filter( 'frm_helper_shortcodes', [ $this, 'register_formidable_tracking_helper_shortcodes' ], 20, 2 );
+    add_filter( 'frm_content', [ $this, 'replace_formidable_tracking_tokens' ], 30, 3 );
   }
 
   /**
@@ -204,6 +206,109 @@ trait PWTSR_Formidable_Trait {
 
     echo '</tbody></table>';
     echo '</div>';
+  }
+
+  /**
+   * Register tracking shortcodes in Formidable's helper insert-code panel.
+   *
+   * @param array $entry_shortcodes Helper shortcodes.
+   * @param bool  $settings_tab     Whether helper panel is shown in settings tab.
+   *
+   * @return array
+   */
+  public function register_formidable_tracking_helper_shortcodes( $entry_shortcodes, $settings_tab ) {
+    if ( ! is_array( $entry_shortcodes ) ) {
+      $entry_shortcodes = [];
+    }
+
+    if ( ! isset( $entry_shortcodes['tracking_all'] ) ) {
+      $entry_shortcodes['tracking_all'] = __( 'Tracking: All Signals', PWTSR::TEXT_DOMAIN );
+    }
+
+    // if ( ! isset( $entry_shortcodes['tracking_values'] ) ) {
+    //   $entry_shortcodes['tracking_values'] = __( 'Tracking: All Signals (Alias)', PWTSR::TEXT_DOMAIN );
+    // }
+
+    foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_FORMIDABLE ) as $key ) {
+      $shortcode = 'tracking_' . $key;
+      if ( isset( $entry_shortcodes[ $shortcode ] ) ) {
+        continue;
+      }
+
+      $entry_shortcodes[ $shortcode ] = sprintf(
+        /* translators: %s tracking key name. */
+        __( 'Tracking: %s', PWTSR::TEXT_DOMAIN ),
+        $key
+      );
+    }
+
+    return $entry_shortcodes;
+  }
+
+  /**
+   * Replace tracking tokens in Formidable content pipelines.
+   *
+   * Supported tokens:
+   * - [tracking_all], [tracking_values], {tracking_all}, {tracking_values}
+   * - [tracking_<key>], {tracking_<key>} e.g. [tracking_utm_source]
+   *
+   * @param string            $content Content string.
+   * @param int|object|string $form    Form object/id.
+   * @param int|object|string $entry   Entry object/id.
+   *
+   * @return string
+   */
+  public function replace_formidable_tracking_tokens( $content, $form, $entry = false ) {
+    if ( ! is_string( $content ) || false === strpos( $content, 'tracking_' ) ) {
+      return $content;
+    }
+
+    $entry_object = $this->resolve_formidable_entry( $entry );
+    if ( ! is_object( $entry_object ) || empty( $entry_object->id ) ) {
+      return $content;
+    }
+
+    $pairs = $this->get_formidable_tracking_pairs( (int) $entry_object->id );
+
+    $all_lines = [];
+    foreach ( $pairs as $key => $value ) {
+      $all_lines[] = $key . ': ' . $value;
+    }
+    $all_value = implode( "\n", $all_lines );
+
+    $content = str_replace( [ '[tracking_all]', '[tracking_values]', '{tracking_all}', '{tracking_values}' ], $all_value, $content );
+
+    foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_FORMIDABLE ) as $key ) {
+      $value   = isset( $pairs[ $key ] ) ? $pairs[ $key ] : '';
+      $content = str_replace(
+        [ '[tracking_' . $key . ']', '{tracking_' . $key . '}' ],
+        $value,
+        $content
+      );
+    }
+
+    return $content;
+  }
+
+  /**
+   * Resolve Formidable entry objects from mixed entry values.
+   *
+   * @param int|object|string $entry Entry reference.
+   *
+   * @return object|null
+   */
+  private function resolve_formidable_entry( $entry ) {
+    if ( is_object( $entry ) && ! empty( $entry->id ) ) {
+      return $entry;
+    }
+
+    if ( ! $entry || ! is_numeric( $entry ) || ! class_exists( 'FrmEntry' ) ) {
+      return null;
+    }
+
+    $entry_object = FrmEntry::getOne( (int) $entry, true );
+
+    return is_object( $entry_object ) ? $entry_object : null;
   }
 
   /**
