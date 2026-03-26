@@ -1,0 +1,26 @@
+.pwtsr-radar-icon {
+  background-image: url('../svg/radar.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  background-color: transparent;
+  display: inline-block;
+  height: 16px;
+  vertical-align: middle;
+  width: 16px;
+}
+
+.pwtsr-radar-icon::before,
+.fa.pwtsr-radar-icon::before {
+  content: '' !important;
+}
+
+.ff_form_wrap .pwtsr-radar-icon,
+.ff_form_editor .pwtsr-radar-icon,
+.wpforms-add-fields-button .pwtsr-radar-icon {
+  margin-right: 6px;
+}
+
+.wpforms-add-fields-button .pwtsr-radar-icon {
+  background-image: url('../svg/radar-white.svg');
+}

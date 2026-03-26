@@ -30,6 +30,46 @@ trait PWTSR_Adapter_Bootstrap_Trait {
     $this->service = new PWTSR_Tracking_Service();
     
     add_action( 'plugins_loaded', [ $this, 'bootstrap_integrations' ], 20 );
+    add_action( 'admin_enqueue_scripts', [ $this, 'maybe_enqueue_builder_icon_styles' ], 20 );
+  }
+
+  /**
+   * Enqueue custom builder icon styles on WPForms/Fluent Forms admin screens.
+   */
+  public function maybe_enqueue_builder_icon_styles() {
+    if ( ! is_admin() ) {
+      return;
+    }
+
+    $screen_id = '';
+    if ( function_exists( 'get_current_screen' ) ) {
+      $screen = get_current_screen();
+      if ( is_object( $screen ) && isset( $screen->id ) ) {
+        $screen_id = (string) $screen->id;
+      }
+    }
+
+    $page = '';
+    if ( isset( $_GET['page'] ) ) {
+      $page = sanitize_key( wp_unslash( $_GET['page'] ) );
+    }
+
+    $is_wpforms_screen = false !== strpos( $screen_id, 'wpforms' ) || false !== strpos( $page, 'wpforms' );
+    $is_fluent_screen  = false !== strpos( $screen_id, 'fluentform' )
+      || false !== strpos( $page, 'fluentform' )
+      || false !== strpos( $screen_id, 'fluent_forms' )
+      || false !== strpos( $page, 'fluent_forms' );
+
+    if ( ! $is_wpforms_screen && ! $is_fluent_screen ) {
+      return;
+    }
+
+    wp_enqueue_style(
+      'presswell-signal-relay-builder-icons',
+      $this->get_asset_url( 'css/builder-icons.css' ),
+      [],
+      PWTSR::VERSION
+    );
   }
 
   /**
@@ -117,15 +157,16 @@ trait PWTSR_Adapter_Bootstrap_Trait {
       //     'includes/adapters/class-ninja-forms-adapter.php',
       //   ],
       // ],
-      // [
-      //   'detector' => [ $this, 'is_fluent_forms_available' ],
-      //   'class'    => 'PWTSR_Fluent_Forms_Adapter',
-      //   'files'    => [
-      //     'includes/traits/trait-adapter-assets.php',
-      //     'includes/traits/trait-fluent-forms-adapter.php',
-      //     'includes/adapters/class-fluent-forms-adapter.php',
-      //   ],
-      // ],
+      [
+        'detector' => [ $this, 'is_fluent_forms_available' ],
+        'class'    => 'PWTSR_Fluent_Forms_Adapter',
+        'files'    => [
+          'includes/traits/trait-adapter-assets.php',
+          'includes/traits/trait-fluent-forms-adapter.php',
+          'includes/adapters/class-fluent-forms-field.php',
+          'includes/adapters/class-fluent-forms-adapter.php',
+        ],
+      ],
       [
         'detector' => [ $this, 'is_formidable_available' ],
         'class'    => 'PWTSR_Formidable_Adapter',
@@ -183,14 +224,14 @@ trait PWTSR_Adapter_Bootstrap_Trait {
   //   return defined( 'NINJA_FORMS_VERSION' ) || class_exists( 'Ninja_Forms' ) || function_exists( 'Ninja_Forms' );
   // }
 
-  // /**
-  //  * Determine whether Fluent Forms is loaded.
-  //  *
-  //  * @return bool
-  //  */
-  // private function is_fluent_forms_available() {
-  //   return defined( 'FLUENTFORM_VERSION' ) || defined( 'FLUENTFORM' );
-  // }
+  /**
+   * Determine whether Fluent Forms is loaded.
+   *
+   * @return bool
+   */
+  private function is_fluent_forms_available() {
+    return defined( 'FLUENTFORM_VERSION' ) || defined( 'FLUENTFORM' );
+  }
 
   /**
    * Determine whether Formidable Forms is loaded.

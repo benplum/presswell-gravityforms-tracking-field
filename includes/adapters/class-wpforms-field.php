@@ -17,7 +17,7 @@ if ( ! class_exists( 'PWTSR_WPForms_Field' ) ) {
       $this->name     = esc_html__( 'Tracking', PWTSR::TEXT_DOMAIN );
       $this->keywords = esc_html__( 'tracking, utm, attribution, campaign', PWTSR::TEXT_DOMAIN );
       $this->type     = PWTSR::FIELD_TYPE;
-      $this->icon     = 'fa-bullseye';
+      $this->icon     = 'pwtsr-radar-icon';
       $this->order    = 310;
       $this->group    = 'fancy';
 

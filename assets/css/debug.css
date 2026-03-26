@@ -62,19 +62,17 @@
   background: transparent !important;
   box-shadow: none !important;
   color: #cbd5e1 !important;
-  font: 600 11px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-  letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
   cursor: pointer !important;
   text-align: left !important;
   text-decoration: none !important;
-  line-height: 1.2 !important;
 }
 
 .presswell-debug-toggle-label {
-  font-size: 12px !important;
-  text-transform: uppercase !important;
+  font: 600 12px/1.2 monospace !important;
   letter-spacing: 0.1em !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase !important;
 }
 
 .presswell-debug-toggle-arrow {
@@ -114,7 +112,7 @@
   font-size: 12px !important;
   color: #93a5be !important;
   font-weight: 600 !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-family: monospace !important;
   text-align: left !important;
   overflow-wrap: anywhere !important;
 }
@@ -127,7 +125,7 @@
   border-radius: 4px !important;
   background: transparent !important;
   color: #e2e8f0 !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-family: monospace !important;
   font-size: 12px !important;
   line-height: 1.4 !important;
   padding: 6px 10px !important;
@@ -140,5 +138,5 @@
 }
 
 .presswell-fluent-transceiver {
-  margin-bottom: 20px !important;
+  margin: 20px 0 !important;
 }

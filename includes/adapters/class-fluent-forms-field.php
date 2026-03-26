@@ -1,0 +1,196 @@
+<?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+  exit;
+}
+
+use FluentForm\App\Services\FormBuilder\BaseFieldManager;
+
+if ( class_exists( 'FluentForm\\App\\Services\\FormBuilder\\BaseFieldManager' ) && ! class_exists( 'PWTSR_Fluent_Forms_Field' ) ) {
+  /**
+   * Fluent Forms custom field that renders Presswell transceiver inputs.
+   */
+  class PWTSR_Fluent_Forms_Field extends BaseFieldManager {
+
+    /**
+     * Register Fluent Forms custom field metadata.
+     */
+    public function __construct() {
+      parent::__construct(
+        PWTSR::FIELD_TYPE,
+        __( 'Tracking', PWTSR::TEXT_DOMAIN ),
+        [ 'tracking', 'utm', 'attribution' ],
+        'advanced'
+      );
+    }
+
+    /**
+     * Component schema for Fluent Forms builder.
+     *
+     * @return array
+     */
+    public function getComponent() {
+      return [
+        'index'      => 30,
+        'element'    => $this->key,
+        'attributes' => [
+          'name'  => 'pwtsr_tracking',
+          'type'  => 'hidden',
+          'value' => '',
+        ],
+        'settings'   => [
+          'label'                 => __( 'Tracking', PWTSR::TEXT_DOMAIN ),
+          'html_codes'            => '<p><strong>' . esc_html__( 'Tracking', PWTSR::TEXT_DOMAIN ) . '</strong></p><p>' . esc_html__( 'Captures UTM and click attribution parameters for the current visitor.', PWTSR::TEXT_DOMAIN ) . '</p>',
+          'container_class'       => '',
+          'conditional_logics'    => [],
+          'name'                  => 'pwtsr_tracking',
+        ],
+        'editor_options' => [
+          'title'      => __( 'Tracking', PWTSR::TEXT_DOMAIN ),
+          'icon_class' => 'pwtsr-radar-icon',
+          'template'   => 'customHTML',
+        ],
+      ];
+    }
+
+    /**
+     * Keep editor settings focused for this hidden utility field.
+     *
+     * @return string[]
+     */
+    public function getGeneralEditorElements() {
+      return [
+        'label',
+      ];
+    }
+
+    /**
+     * Keep editor settings focused for this hidden utility field.
+     *
+     * @return string[]
+     */
+    public function getAdvancedEditorElements() {
+      return [
+        'name',
+        'container_class',
+        'conditional_logics',
+      ];
+    }
+
+    /**
+     * Render transceiver hidden inputs for Fluent Forms frontend.
+     *
+     * @param array  $element Field config.
+     * @param object $form    Fluent form model.
+     */
+    public function render( $element, $form ) {
+      if ( is_admin() ) {
+        return;
+      }
+
+      $base_name = 'pwtsr_tracking';
+      if ( is_array( $element ) && ! empty( $element['attributes']['name'] ) ) {
+        $base_name = sanitize_key( (string) $element['attributes']['name'] );
+        if ( '' === $base_name ) {
+          $base_name = 'pwtsr_tracking';
+        }
+      }
+
+      $inputs = [];
+
+      foreach ( $this->get_tracking_keys() as $key ) {
+        $inputs[] = $this->render_transceiver_input_markup(
+          $key,
+          $base_name . '[' . $key . ']',
+          'presswell-fluent-' . sanitize_html_class( $key )
+        );
+      }
+
+      if ( empty( $inputs ) ) {
+        return;
+      }
+
+      echo PWTSR_Transceiver_Markup::render_wrapper(
+        'presswell-transceiver presswell-fluent-transceiver',
+        PWTSR::ADAPTER_FLUENT_FORMS,
+        implode( '', $inputs ),
+        $this->is_debug_field_mode()
+      );
+    }
+
+    /**
+     * Resolve plugin tracking service.
+     *
+     * @return PWTSR_Tracking_Service
+     */
+    private function get_service() {
+      if ( function_exists( 'presswell_tracking_signal_relay' ) ) {
+        $plugin = presswell_tracking_signal_relay();
+        if ( $plugin && method_exists( $plugin, 'get_service' ) ) {
+          $service = $plugin->get_service();
+          if ( $service instanceof PWTSR_Tracking_Service ) {
+            return $service;
+          }
+        }
+      }
+
+      return new PWTSR_Tracking_Service();
+    }
+
+    /**
+     * Resolve trackable keys for Fluent context.
+     *
+     * @return string[]
+     */
+    private function get_tracking_keys() {
+      return $this->get_service()->get_tracking_keys( PWTSR::ADAPTER_FLUENT_FORMS );
+    }
+
+    /**
+     * Determine whether debug mode is active.
+     *
+     * @return bool
+     */
+    private function is_debug_field_mode() {
+      if ( function_exists( 'presswell_tracking_signal_relay' ) ) {
+        $plugin = presswell_tracking_signal_relay();
+        if ( $plugin && method_exists( $plugin, 'should_show_debug_styles' ) ) {
+          return (bool) $plugin->should_show_debug_styles();
+        }
+      }
+
+      return false;
+    }
+
+    /**
+     * Render per-key transceiver input markup.
+     *
+     * @param string $key   Tracking key.
+     * @param string $name  Input name.
+     * @param string $id    Input id.
+     * @param string $value Input value.
+     *
+     * @return string
+     */
+    private function render_transceiver_input_markup( $key, $name, $id, $value = '' ) {
+      if ( $this->is_debug_field_mode() ) {
+        return sprintf(
+          '<div class="presswell-debug-field-row"><label class="presswell-debug-field-label" for="%1$s">%2$s</label><input type="text" id="%1$s" name="%3$s" value="%4$s" readonly="readonly" data-presswell-transceiver="%5$s" /></div>',
+          esc_attr( $id ),
+          esc_html( $key ),
+          esc_attr( $name ),
+          esc_attr( $value ),
+          esc_attr( $key )
+        );
+      }
+
+      return sprintf(
+        '<input type="hidden" id="%1$s" name="%2$s" value="%3$s" data-presswell-transceiver="%4$s" />',
+        esc_attr( $id ),
+        esc_attr( $name ),
+        esc_attr( $value ),
+        esc_attr( $key )
+      );
+    }
+  }
+}
