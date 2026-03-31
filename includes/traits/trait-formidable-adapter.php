@@ -110,7 +110,7 @@ trait PWTSR_Formidable_Trait {
 
     if ( ! isset( $fields[ PWTSR::FIELD_TYPE ] ) ) {
       $fields[ PWTSR::FIELD_TYPE ] = [
-        'name' => __( 'Tracking', PWTSR::TEXT_DOMAIN ),
+        'name' => __( 'Tracking', 'presswell-signal-relay' ),
         'icon' => 'frmfont pwtsr-radar-icon',
       ];
     }
@@ -159,8 +159,9 @@ trait PWTSR_Formidable_Trait {
     $posted_tracking = [];
     if ( isset( $values['pwtsr_tracking'] ) && is_array( $values['pwtsr_tracking'] ) ) {
       $posted_tracking = $values['pwtsr_tracking'];
+      // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Formidable validates nonce before this filter and values are sanitized below.
     } elseif ( isset( $_POST['pwtsr_tracking'] ) && is_array( $_POST['pwtsr_tracking'] ) ) {
-      $posted_tracking = wp_unslash( $_POST['pwtsr_tracking'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+      $posted_tracking = wp_unslash( $_POST['pwtsr_tracking'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Formidable validates nonce before this filter and values are sanitized below.
     }
 
     foreach ( $field_ids as $field_id ) {
@@ -227,7 +228,7 @@ trait PWTSR_Formidable_Trait {
     }
 
     echo '<div class="frm_grid_container frm-with-margin">';
-    echo '<h3 class="hndle"><span>' . esc_html__( 'Tracking', PWTSR::TEXT_DOMAIN ) . '</span></h3>';
+    echo '<h3 class="hndle"><span>' . esc_html__( 'Tracking', 'presswell-signal-relay' ) . '</span></h3>';
     echo '<table class="widefat striped"><tbody>';
 
     foreach ( $pairs as $key => $value ) {
@@ -255,11 +256,11 @@ trait PWTSR_Formidable_Trait {
     }
 
     if ( ! isset( $entry_shortcodes['tracking_all'] ) ) {
-      $entry_shortcodes['tracking_all'] = __( 'Tracking: All Signals', PWTSR::TEXT_DOMAIN );
+      $entry_shortcodes['tracking_all'] = __( 'Tracking: All Signals', 'presswell-signal-relay' );
     }
 
     // if ( ! isset( $entry_shortcodes['tracking_values'] ) ) {
-    //   $entry_shortcodes['tracking_values'] = __( 'Tracking: All Signals (Alias)', PWTSR::TEXT_DOMAIN );
+    //   $entry_shortcodes['tracking_values'] = __( 'Tracking: All Signals (Alias)', 'presswell-signal-relay' );
     // }
 
     foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_FORMIDABLE ) as $key ) {
@@ -270,7 +271,7 @@ trait PWTSR_Formidable_Trait {
 
       $entry_shortcodes[ $shortcode ] = sprintf(
         /* translators: %s tracking key name. */
-        __( 'Tracking: %s', PWTSR::TEXT_DOMAIN ),
+        __( 'Tracking: %s', 'presswell-signal-relay' ),
         $key
       );
     }

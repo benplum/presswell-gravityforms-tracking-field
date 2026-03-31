@@ -23,8 +23,8 @@ trait PWTSR_Pages_Trait {
    */
   public function register_admin_pages() {
     add_options_page(
-      __( 'Tracking Signal Relay', PWTSR::TEXT_DOMAIN ),
-      __( 'Tracking Signal Relay', PWTSR::TEXT_DOMAIN ),
+      __( 'Tracking Signal Relay', 'presswell-signal-relay' ),
+      __( 'Tracking Signal Relay', 'presswell-signal-relay' ),
       'manage_options',
       PWTSR::SETTINGS_PAGE_SLUG,
       [ $this, 'render_settings_page' ]
@@ -42,7 +42,7 @@ trait PWTSR_Pages_Trait {
     $settings_link = sprintf(
       '<a href="%s">%s</a>',
       esc_url( admin_url( PWTSR::SETTINGS_PAGE_URL ) ),
-      esc_html__( 'Settings', PWTSR::TEXT_DOMAIN )
+      esc_html__( 'Settings', 'presswell-signal-relay' )
     );
 
     array_unshift( $links, $settings_link );

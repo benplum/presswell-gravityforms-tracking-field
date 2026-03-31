@@ -168,10 +168,12 @@ trait PWTSR_Fluent_Forms_Trait {
   private function update_fluent_forms_submission_response( $submission_id, $pairs ) {
     global $wpdb;
 
-    $submissions_table = $wpdb->prefix . 'fluentform_submissions';
+    $submissions_table = esc_sql( $wpdb->prefix . 'fluentform_submissions' );
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal and escaped.
     $current_response  = $wpdb->get_var(
       $wpdb->prepare( "SELECT response FROM {$submissions_table} WHERE id = %d", $submission_id )
     );
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
     $response = [];
     if ( is_string( $current_response ) && '' !== $current_response ) {
@@ -194,6 +196,7 @@ trait PWTSR_Fluent_Forms_Trait {
       }
     }
 
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Fluent Forms submission record must be updated directly.
     $wpdb->update(
       $submissions_table,
       [ 'response' => wp_json_encode( $response ) ],
@@ -217,11 +220,12 @@ trait PWTSR_Fluent_Forms_Trait {
       return;
     }
 
-    $details_table = $wpdb->prefix . 'fluentform_entry_details';
+    $details_table = esc_sql( $wpdb->prefix . 'fluentform_entry_details' );
     $has_source_type = $this->fluent_forms_entry_details_has_source_type( $details_table );
 
     foreach ( $pairs as $key => $value ) {
       if ( $has_source_type ) {
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal and escaped.
         $existing = (int) $wpdb->get_var(
           $wpdb->prepare(
             "SELECT COUNT(1) FROM {$details_table} WHERE submission_id = %d AND form_id = %d AND field_name = %s AND source_type = %s",
@@ -231,7 +235,9 @@ trait PWTSR_Fluent_Forms_Trait {
             'submission_item'
           )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
       } else {
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal and escaped.
         $existing = (int) $wpdb->get_var(
           $wpdb->prepare(
             "SELECT COUNT(1) FROM {$details_table} WHERE submission_id = %d AND form_id = %d AND field_name = %s",
@@ -240,6 +246,7 @@ trait PWTSR_Fluent_Forms_Trait {
             $key
           )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
       }
 
       if ( $existing > 0 ) {
@@ -261,6 +268,7 @@ trait PWTSR_Fluent_Forms_Trait {
         $insert_format[]            = '%s';
       }
 
+      // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Fluent Forms entry detail rows must be written directly.
       $wpdb->insert(
         $details_table,
         $insert_data,
@@ -296,7 +304,7 @@ trait PWTSR_Fluent_Forms_Trait {
 
     $shortcodes = [];
 
-    $shortcodes['{tracking.all}'] = __( 'All Tracking Signals', PWTSR::TEXT_DOMAIN );
+    $shortcodes['{tracking.all}'] = __( 'All Tracking Signals', 'presswell-signal-relay' );
 
     foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_FLUENT_FORMS ) as $key ) {
       $shortcodes[ '{tracking.' . $key . '}' ] = $this->build_fluent_forms_tracking_label( $key );
@@ -307,7 +315,7 @@ trait PWTSR_Fluent_Forms_Trait {
     }
 
     $groups[] = [
-      'title'      => __( 'Tracking Signals', PWTSR::TEXT_DOMAIN ),
+      'title'      => __( 'Tracking Signals', 'presswell-signal-relay' ),
       'shortcodes' => $shortcodes,
     ];
 
@@ -543,9 +551,11 @@ trait PWTSR_Fluent_Forms_Trait {
 
     global $wpdb;
 
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal and escaped.
     $column_name = $wpdb->get_var(
       $wpdb->prepare( "SHOW COLUMNS FROM {$details_table} LIKE %s", 'source_type' )
     );
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
     $this->fluent_entry_details_has_source_type = ! empty( $column_name );
 
@@ -558,18 +568,20 @@ trait PWTSR_Fluent_Forms_Trait {
    * @return array
    */
   private function get_fluent_forms_posted_tracking_values() {
-    if ( empty( $_POST ) || ! is_array( $_POST ) ) {
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Fluent Forms validates nonce before this callback runs.
+    $request_post = isset( $_POST ) && is_array( $_POST ) ? wp_unslash( $_POST ) : [];
+    if ( empty( $request_post ) ) {
       return [];
     }
 
     $values = [];
-    if ( isset( $_POST['pwtsr_tracking'] ) && is_array( $_POST['pwtsr_tracking'] ) ) {
+    if ( isset( $request_post['pwtsr_tracking'] ) && is_array( $request_post['pwtsr_tracking'] ) ) {
       foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_FLUENT_FORMS ) as $key ) {
-        if ( ! isset( $_POST['pwtsr_tracking'][ $key ] ) || is_array( $_POST['pwtsr_tracking'][ $key ] ) ) {
+        if ( ! isset( $request_post['pwtsr_tracking'][ $key ] ) || is_array( $request_post['pwtsr_tracking'][ $key ] ) ) {
           continue;
         }
 
-        $values[ $key ] = wp_unslash( $_POST['pwtsr_tracking'][ $key ] );
+        $values[ $key ] = $request_post['pwtsr_tracking'][ $key ];
       }
 
       if ( ! empty( $values ) ) {
@@ -578,11 +590,11 @@ trait PWTSR_Fluent_Forms_Trait {
     }
 
     foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_FLUENT_FORMS ) as $key ) {
-      if ( ! isset( $_POST[ $key ] ) || is_array( $_POST[ $key ] ) ) {
+      if ( ! isset( $request_post[ $key ] ) || is_array( $request_post[ $key ] ) ) {
         continue;
       }
 
-      $values[ $key ] = wp_unslash( $_POST[ $key ] );
+      $values[ $key ] = $request_post[ $key ];
     }
 
     return $values;

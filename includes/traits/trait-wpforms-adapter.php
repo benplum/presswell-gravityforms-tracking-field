@@ -202,12 +202,12 @@ trait PWTSR_WPForms_Trait {
       $smart_tags = [];
     }
 
-    $smart_tags['tracking_all'] = __( 'Tracking: All Values', PWTSR::TEXT_DOMAIN );
+    $smart_tags['tracking_all'] = __( 'Tracking: All Values', 'presswell-signal-relay' );
 
     foreach ( $this->service->get_tracking_keys( PWTSR::ADAPTER_WPFORMS ) as $key ) {
       $smart_tags[ 'tracking_' . $key ] = sprintf(
         /* translators: %s tracking key name. */
-        __( 'Tracking: %s', PWTSR::TEXT_DOMAIN ),
+        __( 'Tracking: %s', 'presswell-signal-relay' ),
         $key
       );
     }

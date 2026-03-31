@@ -39,9 +39,9 @@ trait PWTSR_Gravity_Forms_Trait {
     $keys = $this->service->get_tracking_keys( 'gravityforms' );
     ?>
     case 'presswell_transceiver':
-      field.label = '<?php echo esc_js( __( 'Tracking', PWTSR::TEXT_DOMAIN ) ); ?>';
+      field.label = '<?php echo esc_js( __( 'Tracking', 'presswell-signal-relay' ) ); ?>';
       field.labelPlacement = 'hidden_label';
-      field.description = '<?php echo esc_js( __( 'Captures UTM and click attribution parameters for the current visitor.', PWTSR::TEXT_DOMAIN ) ); ?>';
+      field.description = '<?php echo esc_js( __( 'Captures UTM and click attribution parameters for the current visitor.', 'presswell-signal-relay' ) ); ?>';
       field.inputs = [];
       <?php foreach ( $keys as $index => $key ) : ?>
       field.inputs.push( new Input( field.id + '.<?php echo esc_js( $index + 1 ); ?>', '<?php echo esc_js( $key ); ?>', '<?php echo esc_js( $key ); ?>' ) );
@@ -165,6 +165,7 @@ trait PWTSR_Gravity_Forms_Trait {
    * @return array
    */
   public function sanitize_tracking_submission_values( $form ) {
+    // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Gravity Forms validates nonce and payload before this hook runs.
     if ( empty( $form['fields'] ) || ! is_array( $form['fields'] ) || empty( $_POST ) || ! is_array( $_POST ) ) {
       return $form;
     }
@@ -200,6 +201,8 @@ trait PWTSR_Gravity_Forms_Trait {
       }
     }
 
+    // phpcs:enable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
     return $form;
   }
 
@@ -211,7 +214,7 @@ trait PWTSR_Gravity_Forms_Trait {
     <script type="text/javascript">
       (function (window, document) {
         var slug = '<?php echo esc_js( PWTSR::FIELD_TYPE ); ?>';
-        var warning = '<?php echo esc_js( __( 'Only one Tracking field can be added per form.', PWTSR::TEXT_DOMAIN ) ); ?>';
+        var warning = '<?php echo esc_js( __( 'Only one Tracking field can be added per form.', 'presswell-signal-relay' ) ); ?>';
 
         function guardSingleField() {
           if (typeof window.StartAddField !== 'function' || window.StartAddField._presswellTransceiverGuard) {
@@ -294,13 +297,14 @@ trait PWTSR_Gravity_Forms_Trait {
     }
 
     $merge_tags[] = [
-      'label' => __( 'Tracking: All Values', PWTSR::TEXT_DOMAIN ),
+      'label' => __( 'Tracking: All Values', 'presswell-signal-relay' ),
       'tag'   => '{tracking:all}',
     ];
 
     foreach ( $this->service->get_tracking_keys( 'gravityforms' ) as $key ) {
       $merge_tags[] = [
-        'label' => sprintf( __( 'Tracking: %s', PWTSR::TEXT_DOMAIN ), $key ),
+        /* translators: %s: Tracking key name. */
+        'label' => sprintf( __( 'Tracking: %s', 'presswell-signal-relay' ), $key ),
         'tag'   => '{tracking:' . $key . '}',
       ];
     }

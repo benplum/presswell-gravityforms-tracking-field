@@ -1,9 +1,9 @@
 === Presswell Tracking Signal Relay ===
 Contributors: presswell, benplum
-Tags: attribution, utm, tracking, marketing, lead tracking, forms, gravity forms, wpforms, contact form 7, fluent forms, forminator, formidable
+Tags: attribution, utm, tracking, forms, lead-generation
 Requires at least: 6.1
-Tested up to: 6.5
-Stable tag: trunk
+Tested up to: 6.9
+Stable tag: 1.0.0
 License: GNU General Public License v2.0 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

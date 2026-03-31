@@ -40,7 +40,7 @@ if ( class_exists( 'GF_Field' ) && ! class_exists( 'PWTSR_Gravity_Forms_Field' )
      * @return string
      */
     public function get_form_editor_field_title() {
-      return esc_html__( 'Tracking', PWTSR::TEXT_DOMAIN );
+      return esc_html__( 'Tracking', 'presswell-signal-relay' );
     }
 
     /**
@@ -73,7 +73,7 @@ if ( class_exists( 'GF_Field' ) && ! class_exists( 'PWTSR_Gravity_Forms_Field' )
     public function get_form_editor_button() {
       return [
         'group' => 'advanced_fields',
-        'text'  => esc_html__( 'Tracking', PWTSR::TEXT_DOMAIN ),
+        'text'  => esc_html__( 'Tracking', 'presswell-signal-relay' ),
       ];
     }
 
@@ -235,7 +235,7 @@ if ( class_exists( 'GF_Field' ) && ! class_exists( 'PWTSR_Gravity_Forms_Field' )
       if ( GFCommon::is_form_editor() ) {
         $content  = parent::get_field_content( $value, $lead_id, $form_id );
         $icon_url = esc_url( plugin_dir_url( Presswell_Tracking_Signal_Relay::PLUGIN_FILE ) . 'assets/svg/radar.svg' );
-        $label    = esc_html__( 'Tracking', PWTSR::TEXT_DOMAIN );
+        $label    = esc_html__( 'Tracking', 'presswell-signal-relay' );
 
         $badge = sprintf(
           '<div class="presswell-transceiver-editor-badge" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-weight:600;"><img src="%1$s" alt="%2$s" width="20" height="20" style="display:block;" /><span>%2$s</span></div>',

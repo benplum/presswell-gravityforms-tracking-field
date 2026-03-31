@@ -194,15 +194,17 @@ trait PWTSR_Forminator_Trait {
    * @return array
    */
   private function get_posted_tracking_values() {
-    if ( empty( $_POST ) || ! is_array( $_POST ) ) {
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Forminator validates nonce before this callback runs.
+    $request_post = isset( $_POST ) && is_array( $_POST ) ? wp_unslash( $_POST ) : [];
+    if ( empty( $request_post ) ) {
       return [];
     }
 
     $values = [];
     $nested = [];
 
-    if ( isset( $_POST['data'] ) ) {
-      $nested_raw = wp_unslash( $_POST['data'] );
+    if ( isset( $request_post['data'] ) ) {
+      $nested_raw = $request_post['data'];
       if ( is_array( $nested_raw ) ) {
         $nested = $nested_raw;
       }
@@ -211,8 +213,8 @@ trait PWTSR_Forminator_Trait {
     foreach ( $this->service->get_tracking_keys( 'forminator' ) as $key ) {
       $raw = null;
 
-      if ( isset( $_POST[ $key ] ) ) {
-        $raw = wp_unslash( $_POST[ $key ] );
+      if ( isset( $request_post[ $key ] ) ) {
+        $raw = $request_post[ $key ];
       } elseif ( isset( $nested[ $key ] ) ) {
         $raw = $nested[ $key ];
       }

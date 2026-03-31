@@ -107,6 +107,7 @@ if ( ! function_exists( 'presswell_tracking_signal_relay' ) ) {
    *
    * @return Presswell_Tracking_Signal_Relay
    */
+  // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public helper name is intentional and kept for backward compatibility.
   function presswell_tracking_signal_relay() {
     return Presswell_Tracking_Signal_Relay::instance();
   }

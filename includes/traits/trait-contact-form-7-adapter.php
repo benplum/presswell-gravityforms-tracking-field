@@ -73,7 +73,9 @@ trait PWTSR_Contact_Form_7_Trait {
       $posted_data = [];
     }
 
-    if ( empty( $_POST ) || ! is_array( $_POST ) ) {
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Contact Form 7 validates nonce before posted-data filters run.
+    $request_post = isset( $_POST ) && is_array( $_POST ) ? wp_unslash( $_POST ) : [];
+    if ( empty( $request_post ) ) {
       return $posted_data;
     }
 
@@ -82,8 +84,8 @@ trait PWTSR_Contact_Form_7_Trait {
 
       if ( isset( $posted_data[ $key ] ) && ! is_array( $posted_data[ $key ] ) ) {
         $raw = $posted_data[ $key ];
-      } elseif ( isset( $_POST[ $key ] ) && ! is_array( $_POST[ $key ] ) ) {
-        $raw = wp_unslash( $_POST[ $key ] );
+      } elseif ( isset( $request_post[ $key ] ) && ! is_array( $request_post[ $key ] ) ) {
+        $raw = $request_post[ $key ];
       }
 
       if ( null === $raw ) {

@@ -19,7 +19,7 @@ final class PWTSR_Transceiver_Markup {
       return false;
     }
 
-    $raw = wp_unslash( $_COOKIE['pwsrDebugClosed'] );
+    $raw = sanitize_text_field( wp_unslash( $_COOKIE['pwsrDebugClosed'] ) );
 
     return '1' === (string) $raw;
   }

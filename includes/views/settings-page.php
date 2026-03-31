@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 ?>
 <div class="wrap">
-  <h1><?php echo esc_html__( 'Tracking Signal Relay', PWTSR::TEXT_DOMAIN ); ?></h1>
+  <h1><?php echo esc_html__( 'Tracking Signal Relay', 'presswell-signal-relay' ); ?></h1>
   <form method="post" action="options.php">
     <?php
       settings_fields( 'pwtsr_settings_group' );

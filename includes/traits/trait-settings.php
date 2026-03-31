@@ -31,14 +31,14 @@ trait PWTSR_Settings_Trait {
 
     add_settings_section(
       'pwtsr_main_section',
-      __( 'Settings', PWTSR::TEXT_DOMAIN ),
+      __( 'Settings', 'presswell-signal-relay' ),
       '__return_false',
       PWTSR::SETTINGS_PAGE_SLUG
     );
     
     add_settings_field(
       'custom_params',
-      __( 'Custom Query Params', PWTSR::TEXT_DOMAIN ),
+      __( 'Custom Query Params', 'presswell-signal-relay' ),
       [ $this, 'render_custom_params_field' ],
       PWTSR::SETTINGS_PAGE_SLUG,
       'pwtsr_main_section'
@@ -46,7 +46,7 @@ trait PWTSR_Settings_Trait {
 
     add_settings_field(
       'debug_mode',
-      __( 'Debug Display', PWTSR::TEXT_DOMAIN ),
+      __( 'Debug Display', 'presswell-signal-relay' ),
       [ $this, 'render_debug_mode_field' ],
       PWTSR::SETTINGS_PAGE_SLUG,
       'pwtsr_main_section'
@@ -121,7 +121,7 @@ trait PWTSR_Settings_Trait {
     ?>
     <label>
       <input type="checkbox" name="<?php echo esc_attr( PWTSR::SETTINGS_KEY ); ?>[debug_mode]" value="on" <?php checked( isset( $settings['debug_mode'] ) ? $settings['debug_mode'] : 'off', 'on' ); ?> />
-      <?php echo esc_html__( 'Show tracking field containers on the frontend for editors and admins.', PWTSR::TEXT_DOMAIN ); ?>
+      <?php echo esc_html__( 'Show tracking field containers on the frontend for editors and admins.', 'presswell-signal-relay' ); ?>
     </label>
     <?php
   }
@@ -141,7 +141,7 @@ trait PWTSR_Settings_Trait {
       placeholder="utm_id&#10;affiliate_id&#10;campaign_source"
     ><?php echo esc_textarea( $value ); ?></textarea>
     <p class="description">
-      <?php echo esc_html__( 'Add custom query parameter keys to track. Use commas or new lines (for example: utm_id, affiliate_id).', PWTSR::TEXT_DOMAIN ); ?>
+      <?php echo esc_html__( 'Add custom query parameter keys to track. Use commas or new lines (for example: utm_id, affiliate_id).', 'presswell-signal-relay' ); ?>
     </p>
     <?php
   }
