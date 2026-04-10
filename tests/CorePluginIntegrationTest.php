@@ -19,7 +19,7 @@ class CorePluginIntegrationTest extends WP_UnitTestCase {
   public function test_core_admin_and_bootstrap_hooks_are_registered() {
     $this->assertNotFalse( has_action( 'admin_init', [ $this->plugin, 'register_settings' ] ) );
     $this->assertNotFalse( has_action( 'admin_menu', [ $this->plugin, 'register_admin_pages' ] ) );
-    $this->assertNotFalse( has_action( 'plugins_loaded', [ $this->plugin, 'bootstrap_integrations' ] ) );
+    $this->assertNotFalse( has_action( 'init', [ $this->plugin, 'bootstrap_integrations' ] ) );
     $this->assertNotFalse( has_action( 'admin_enqueue_scripts', [ $this->plugin, 'maybe_enqueue_builder_icon_styles' ] ) );
 
     $filter = 'plugin_action_links_' . plugin_basename( Presswell_Tracking_Signal_Relay::PLUGIN_FILE );
