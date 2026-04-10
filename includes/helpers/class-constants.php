@@ -34,6 +34,7 @@ final class PWTSR {
   const ADAPTER_FORMIDABLE = 'formidable';
   const ADAPTER_FORMINATOR = 'forminator';
   const ADAPTER_GRAVITY_FORMS = 'gravityforms';
+  // const ADAPTER_NINJA_FORMS = 'ninjaforms';
   const ADAPTER_WPFORMS = 'wpforms';
 
   const DEFAULT_TRACKING_KEYS = [

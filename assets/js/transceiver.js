@@ -209,6 +209,55 @@
     return payload;
   }
 
+  // function syncNinjaTrackingFields(values) {
+  //   var payload = buildTrackingPayload(values);
+  //   var json = JSON.stringify(payload);
+  //   var forms = document.querySelectorAll('form[id^="nf-form-"]');
+
+  //   if (!forms.length) {
+  //     return;
+  //   }
+
+  //   forms.forEach(function (form) {
+  //     var trackingInputs = form.querySelectorAll('.presswell_tracking-wrap input[type="hidden"], .presswell_tracking-container input[type="hidden"]');
+
+  //     trackingInputs.forEach(function (input) {
+  //       input.value = json;
+  //     });
+  //   });
+
+  //   if (!Array.isArray(window.nfForms)) {
+  //     return;
+  //   }
+
+  //   window.nfForms.forEach(function (nfForm) {
+  //     if (!nfForm || !Array.isArray(nfForm.fields)) {
+  //       return;
+  //     }
+
+  //     nfForm.fields.forEach(function (field) {
+  //       var settings = field && field.settings ? field.settings : field;
+  //       if (!settings || settings.type !== 'presswell_tracking') {
+  //         return;
+  //       }
+
+  //       settings.value = json;
+  //       if (field && typeof field === 'object') {
+  //         field.value = json;
+  //       }
+
+  //       if (!settings.id) {
+  //         return;
+  //       }
+
+  //       var domInput = document.getElementById('nf-field-' + settings.id);
+  //       if (domInput) {
+  //         domInput.value = json;
+  //       }
+  //     });
+  //   });
+  // }
+
   function syncSignals() {
     var stored = readStorage() || {};
     var fresh = getQueryValues();
@@ -225,6 +274,7 @@
 
     injectForminatorFallbackInputs();
     populateInputs(merged);
+    // syncNinjaTrackingFields(merged);
   }
 
   function init() {

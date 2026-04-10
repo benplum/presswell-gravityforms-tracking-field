@@ -225,6 +225,15 @@ trait PWTSR_Adapter_Bootstrap_Trait {
   private function is_gravity_forms_available() {
     return class_exists( 'GFForms' );
   }
+  
+  // /**
+  //  * Determine whether Ninja Forms is loaded.
+  //  *
+  //  * @return bool
+  //  */
+  // private function is_ninja_forms_available() {
+  //   return defined( 'NINJA_FORMS_VERSION' ) || class_exists( 'Ninja_Forms' ) || function_exists( 'Ninja_Forms' );
+  // }
 
   /**
    * Determine whether WPForms is loaded.
