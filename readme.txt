@@ -50,16 +50,14 @@ Presswell Tracking Signal Relay captures attribution parameters and stores them 
 
 Example:
 
-```
-add_filter( 'pwtsr_tracking_keys', function( $keys, $context ) {
-  if ( 'gravityforms' !== $context ) {
-    return $keys;
-  }
-  $keys[] = 'custom_param';
-  $keys[] = 'utm_id';
-  return $keys;
-}, 10, 2 );
-```
+    add_filter( 'pwtsr_tracking_keys', function( $keys, $context ) {
+      if ( 'gravityforms' !== $context ) {
+        return $keys;
+      }
+      $keys[] = 'custom_param';
+      $keys[] = 'utm_id';
+      return $keys;
+    }, 10, 2 );
 
 **pwtsr_tracking_ttl( $ttl, $context )**
 
@@ -69,14 +67,12 @@ add_filter( 'pwtsr_tracking_keys', function( $keys, $context ) {
 
 Example:
 
-```
-add_filter( 'pwtsr_tracking_ttl', function( $ttl, $context ) {
-  if ( 'core' !== $context ) {
-    return $ttl;
-  }
-  return DAY_IN_SECONDS * 7;
-}, 10, 2 );
-```
+    add_filter( 'pwtsr_tracking_ttl', function( $ttl, $context ) {
+      if ( 'core' !== $context ) {
+        return $ttl;
+      }
+      return DAY_IN_SECONDS * 7;
+    }, 10, 2 );
 
 **pwtsr_storage_key( $storage_key, $context )**
 
